@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Przegląd zdjęć</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .modal { position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; }
+    .modal-content { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 4px 25px rgba(0,0,0,0.5); }
+    .modal-close { position: fixed; top: 30px; right: 30px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; user-select: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Przegląd zdjęć</h1>
+    <a href="/" class="back-btn">← Strona główna</a>
+    
+    <div id="gallery"></div>
+    <p id="noPhotos" style="display:none;">Brak przesłanych zdjęć</p>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <span id="modalClose" class="modal-close">&times;</span>
+    <img id="modalImg" class="modal-content" alt="Podgląd zdjęcia" />
+  </div>
+
+  <script>
+    async function loadPhotos() {
+      const res = await fetch('/photos');
+      const photos = await res.json();
+      const gallery = document.getElementById('gallery');
+      const noPhotos = document.getElementById('noPhotos');
+      
+      gallery.innerHTML = '';
+      
+      if (photos.length === 0) {
+        noPhotos.style.display = 'block';
+        return;
+      }
+      
+      noPhotos.style.display = 'none';
+      
+      photos.forEach(photo => {
+        const img = document.createElement('img');
+        img.src = '/photos/' + photo;
+        img.alt = photo;
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', () => openModal(img.src));
+        gallery.appendChild(img);
+      });
+    }
+
+    function openModal(src) {
+      document.getElementById('modal').style.display = 'flex';
+      document.getElementById('modalImg').src = src;
+    }
+
+    document.getElementById('modalClose').onclick = () => {
+      document.getElementById('modal').style.display = 'none';
+    };
+
+    document.getElementById('modal').onclick = (e) => {
+      if (e.target.id === 'modal') {
+        document.getElementById('modal').style.display = 'none';
+      }
+    };
+
+    loadPhotos();
+  </script>
+</body>
+</html>

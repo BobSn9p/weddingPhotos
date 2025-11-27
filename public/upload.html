@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prześlij zdjęcia</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Prześlij zdjęcia</h1>
+    <a href="/" class="back-btn">← Powrót</a>
+    
+    <form id="uploadForm">
+      <input type="file" id="photoInput" name="photo" accept="image/*" required multiple />
+      <br />
+      <button type="submit">Dodaj zdjęcia</button>
+    </form>
+    
+    <div id="status"></div>
+  </div>
+
+  <script>
+    document.getElementById('uploadForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('photoInput');
+      const status = document.getElementById('status');
+      
+      status.textContent = 'Przesyłanie...';
+      
+      for (let file of input.files) {
+        const formData = new FormData();
+        formData.append('photo', file);
+        
+        const res = await fetch('/upload', { 
+          method: 'POST', 
+          body: formData 
+        });
+        
+        if (!res.ok) {
+          status.textContent = 'Błąd: ' + await res.text();
+          return;
+        }
+      }
+      
+      input.value = '';
+      status.innerHTML = '✅ Zdjęcia zostały przesłane pomyślnie!';
+    };
+  </script>
+</body>
+</html>
