@@ -3,8 +3,10 @@ let currentPhotoIndex = 0;
 let isAnimating = false;
 let startX = 0, startY = 0, isSwiping = false;
 const SWIPE_THRESHOLD = 50;
-const VISIBLE_LIMIT = 20; // Pokazuj tylko 20 widocznych
-let observer = null;
+const BATCH_SIZE = 20;
+let renderedCount = 0;
+let scrollObserver = null;
+let imageObserver = null;
 
 async function loadPhotos() {
   const res = await fetch('/photos');
@@ -13,6 +15,7 @@ async function loadPhotos() {
   const noPhotos = document.getElementById('noPhotos');
   
   gallery.innerHTML = '';
+  renderedCount = 0;
   
   if (allPhotos.length === 0) {
     noPhotos.style.display = 'block';
@@ -20,42 +23,62 @@ async function loadPhotos() {
   }
   
   noPhotos.style.display = 'none';
+  console.log('Załadowano zdjęć:', allPhotos.length);
   
-  // ✅ DODAJ TYLKO PIERWSZE 20 + OBSERVER
-  initVirtualScroll(gallery);
+  initObservers(gallery);
+  renderNextBatch(gallery); // Pierwsza paczka
 }
 
-function initVirtualScroll(gallery) {
-  // Usuń poprzedni observer
-  if (observer) observer.disconnect();
-  
-  // Stwórz placeholder'y dla niewidocznych zdjęć
-  for (let i = 0; i < Math.min(VISIBLE_LIMIT, allPhotos.length); i++) {
-    createImageElement(gallery, i);
-  }
-  
-  // ✅ INTERSECTION OBSERVER - ładuj tylko widoczne
-  observer = new IntersectionObserver((entries) => {
+function initObservers(gallery) {
+  // Observer dla lazy loading OBRAZKÓW
+  imageObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const img = entry.target;
         const index = parseInt(img.dataset.index);
-        
-        // Ustaw src tylko gdy widoczne
         if (!img.src || img.src === '') {
-          img.src = `/photos/${allPhotos[index]}`;
+          img.src = getImageUrl(allPhotos[index]);
           img.loading = 'lazy';
         }
       }
     });
-  }, {
-    rootMargin: '100px', // Ładuj 100px przed widocznością
-    threshold: 0.1
-  });
+  }, { rootMargin: '100px', threshold: 0.1 });
   
-  // Obserwuj wszystkie obrazki
-  const images = gallery.querySelectorAll('img');
-  images.forEach(img => observer.observe(img));
+  // Observer dla przewijania (SENTINEL na dole)
+  scrollObserver = new IntersectionObserver((entries) => {
+    const sentinel = entries[0];
+    if (sentinel.isIntersecting && renderedCount < allPhotos.length) {
+      renderNextBatch(sentinel.target.parentNode);
+    }
+  }, { threshold: 0 });
+}
+
+function renderNextBatch(gallery) {
+  const startIndex = renderedCount;
+  const endIndex = Math.min(startIndex + BATCH_SIZE, allPhotos.length);
+  
+  // Dodaj obrazki
+  for (let i = startIndex; i < endIndex; i++) {
+    createImageElement(gallery, i);
+  }
+  
+  renderedCount = endIndex;
+  console.log(`Wygenerowano ${renderedCount}/${allPhotos.length}`);
+  
+  // Dodaj lub zaktualizuj SENTINEL (niewidoczny trigger)
+  let sentinel = gallery.querySelector('.sentinel');
+  if (!sentinel) {
+    sentinel = document.createElement('div');
+    sentinel.className = 'sentinel';
+    sentinel.style.height = '1px';
+    gallery.appendChild(sentinel);
+  }
+  
+  scrollObserver.observe(sentinel);
+}
+
+function getImageUrl(photoName) {
+  return `/photos/${photoName}`;
 }
 
 function createImageElement(container, index) {
@@ -65,12 +88,11 @@ function createImageElement(container, index) {
   img.style.cursor = 'pointer';
   img.className = 'gallery-image';
   img.addEventListener('click', () => openModal(index));
-  
-  // ✅ PLACEHOLDER - szary kwadrat zanim się załaduje
   img.style.background = '#f0f0f0';
   img.style.minHeight = '200px';
+  container.insertBefore(img, container.querySelector('.sentinel'));
   
-  container.appendChild(img);
+  imageObserver.observe(img);
   return img;
 }
 
@@ -79,9 +101,11 @@ function openModal(index) {
   const modalImg = document.getElementById('modalImg');
   const modal = document.getElementById('modal');
   
+  console.log('Otwieram:', getImageUrl(allPhotos[currentPhotoIndex]));
+  
   modalImg.style.transition = 'none';
   modalImg.style.transform = 'translateX(0) scale(1)';
-  modalImg.src = `/photos/${allPhotos[currentPhotoIndex]}`;
+  modalImg.src = getImageUrl(allPhotos[currentPhotoIndex]);
   
   updateCounter();
   showNavArrows();
@@ -117,7 +141,7 @@ function slidePhoto(direction) {
   modalImg.style.transform = `translateX(${exitDirection})`;
   
   setTimeout(() => {
-    modalImg.src = `/photos/${allPhotos[nextIndex]}`;
+    modalImg.src = getImageUrl(allPhotos[nextIndex]);
     modalImg.style.transition = 'none';
     const entryDirection = direction > 0 ? '130%' : '-130%';
     modalImg.style.transform = `translateX(${entryDirection})`;
@@ -137,8 +161,8 @@ function slidePhoto(direction) {
   }, 600);
 }
 
+// Event listeners (bez zmian)
 document.addEventListener('DOMContentLoaded', () => {
-  // Event listeners (bez zmian)
   document.getElementById('navLeft').onclick = () => slidePhoto(-1);
   document.getElementById('navRight').onclick = () => slidePhoto(1);
   
