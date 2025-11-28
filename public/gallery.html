@@ -2,12 +2,93 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Przegląd zdjęć</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
-    .modal { position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; }
-    .modal-content { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 4px 25px rgba(0,0,0,0.5); }
-    .modal-close { position: fixed; top: 30px; right: 30px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; user-select: none; }
+    .modal { 
+      position: fixed; 
+      z-index: 1000; 
+      left: 0; top: 0; 
+      width: 100%; height: 100%; 
+      overflow: hidden;
+      background-color: rgba(0,0,0,0.9); 
+      display: none; 
+      justify-content: center; 
+      align-items: center; 
+      touch-action: pan-y;
+    }
+    
+    .modal-slideshow {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content { 
+      position: absolute;
+      max-width: 95%; 
+      max-height: 95%; 
+      border-radius: 8px; 
+      box-shadow: 0 4px 25px rgba(0,0,0,0.5);
+      user-select: none;
+      -webkit-user-drag: none;
+      will-change: transform;
+    }
+    
+    .modal-close { 
+      position: fixed; 
+      top: 20px; right: 20px; 
+      color: white; 
+      font-size: 36px; 
+      font-weight: bold; 
+      cursor: pointer; 
+      user-select: none; 
+      z-index: 1001;
+      padding: 10px;
+    }
+    
+    .nav-arrow {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.5);
+      color: white;
+      font-size: 28px;
+      width: 50px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      z-index: 1001;
+    }
+    .nav-arrow:hover { 
+      background: rgba(0,0,0,0.8); 
+      transform: translateY(-50%) scale(1.1); 
+    }
+    .nav-left { left: 15px; }
+    .nav-right { right: 15px; }
+    .nav-arrow.hidden { display: none; }
+    
+    .photo-counter {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 16px;
+      z-index: 1001;
+    }
   </style>
 </head>
 <body>
@@ -22,51 +103,17 @@
   <!-- Modal -->
   <div id="modal" class="modal">
     <span id="modalClose" class="modal-close">&times;</span>
-    <img id="modalImg" class="modal-content" alt="Podgląd zdjęcia" />
+    
+    <div id="navLeft" class="nav-arrow nav-left hidden">‹</div>
+    <div id="navRight" class="nav-arrow nav-right hidden">›</div>
+    
+    <div class="modal-slideshow">
+      <img id="modalImg" class="modal-content" alt="Podgląd zdjęcia" />
+    </div>
+    
+    <div class="photo-counter" id="photoCounter"></div>
   </div>
 
-  <script>
-    async function loadPhotos() {
-      const res = await fetch('/photos');
-      const photos = await res.json();
-      const gallery = document.getElementById('gallery');
-      const noPhotos = document.getElementById('noPhotos');
-      
-      gallery.innerHTML = '';
-      
-      if (photos.length === 0) {
-        noPhotos.style.display = 'block';
-        return;
-      }
-      
-      noPhotos.style.display = 'none';
-      
-      photos.forEach(photo => {
-        const img = document.createElement('img');
-        img.src = '/photos/' + photo;
-        img.alt = photo;
-        img.style.cursor = 'pointer';
-        img.addEventListener('click', () => openModal(img.src));
-        gallery.appendChild(img);
-      });
-    }
-
-    function openModal(src) {
-      document.getElementById('modal').style.display = 'flex';
-      document.getElementById('modalImg').src = src;
-    }
-
-    document.getElementById('modalClose').onclick = () => {
-      document.getElementById('modal').style.display = 'none';
-    };
-
-    document.getElementById('modal').onclick = (e) => {
-      if (e.target.id === 'modal') {
-        document.getElementById('modal').style.display = 'none';
-      }
-    };
-
-    loadPhotos();
-  </script>
+  <script src="gallery.js"></script>
 </body>
 </html>
