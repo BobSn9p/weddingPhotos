@@ -51,6 +51,7 @@
       padding: 10px;
     }
     
+    /* Strzałki - UKRYTE na mobile */
     .nav-arrow {
       position: fixed;
       top: 50%;
@@ -76,6 +77,20 @@
     .nav-left { left: 15px; }
     .nav-right { right: 15px; }
     .nav-arrow.hidden { display: none; }
+    
+    /* MOBILE: ukryj strzałki */
+    @media (max-width: 768px) {
+      .nav-arrow {
+        display: none !important;
+      }
+    }
+    
+    /* DESKTOP: pokaż strzałki */
+    @media (min-width: 769px) {
+      .nav-arrow {
+        display: flex;
+      }
+    }
     
     .photo-counter {
       position: fixed;
@@ -104,6 +119,7 @@
   <div id="modal" class="modal">
     <span id="modalClose" class="modal-close">&times;</span>
     
+    <!-- Strzałki (widoczne tylko na desktop) -->
     <div id="navLeft" class="nav-arrow nav-left hidden">‹</div>
     <div id="navRight" class="nav-arrow nav-right hidden">›</div>
     
