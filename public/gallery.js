@@ -3,6 +3,8 @@ let currentPhotoIndex = 0;
 let isAnimating = false;
 let startX = 0, startY = 0, isSwiping = false;
 const SWIPE_THRESHOLD = 50;
+const VISIBLE_LIMIT = 20; // Pokazuj tylko 20 widocznych
+let observer = null;
 
 async function loadPhotos() {
   const res = await fetch('/photos');
@@ -19,15 +21,57 @@ async function loadPhotos() {
   
   noPhotos.style.display = 'none';
   
-  allPhotos.forEach((photo, index) => {
-    const img = document.createElement('img');
-    img.src = '/photos/' + photo;
-    img.alt = photo;
-    img.style.cursor = 'pointer';
-    img.dataset.index = index;
-    img.addEventListener('click', () => openModal(index));
-    gallery.appendChild(img);
+  // ✅ DODAJ TYLKO PIERWSZE 20 + OBSERVER
+  initVirtualScroll(gallery);
+}
+
+function initVirtualScroll(gallery) {
+  // Usuń poprzedni observer
+  if (observer) observer.disconnect();
+  
+  // Stwórz placeholder'y dla niewidocznych zdjęć
+  for (let i = 0; i < Math.min(VISIBLE_LIMIT, allPhotos.length); i++) {
+    createImageElement(gallery, i);
+  }
+  
+  // ✅ INTERSECTION OBSERVER - ładuj tylko widoczne
+  observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        const index = parseInt(img.dataset.index);
+        
+        // Ustaw src tylko gdy widoczne
+        if (!img.src || img.src === '') {
+          img.src = `/photos/${allPhotos[index]}`;
+          img.loading = 'lazy';
+        }
+      }
+    });
+  }, {
+    rootMargin: '100px', // Ładuj 100px przed widocznością
+    threshold: 0.1
   });
+  
+  // Obserwuj wszystkie obrazki
+  const images = gallery.querySelectorAll('img');
+  images.forEach(img => observer.observe(img));
+}
+
+function createImageElement(container, index) {
+  const img = document.createElement('img');
+  img.dataset.index = index;
+  img.alt = `Zdjęcie ${index + 1}`;
+  img.style.cursor = 'pointer';
+  img.className = 'gallery-image';
+  img.addEventListener('click', () => openModal(index));
+  
+  // ✅ PLACEHOLDER - szary kwadrat zanim się załaduje
+  img.style.background = '#f0f0f0';
+  img.style.minHeight = '200px';
+  
+  container.appendChild(img);
+  return img;
 }
 
 function openModal(index) {
@@ -35,7 +79,6 @@ function openModal(index) {
   const modalImg = document.getElementById('modalImg');
   const modal = document.getElementById('modal');
   
-  // Reset - jedno zdjęcie
   modalImg.style.transition = 'none';
   modalImg.style.transform = 'translateX(0) scale(1)';
   modalImg.src = `/photos/${allPhotos[currentPhotoIndex]}`;
@@ -44,7 +87,6 @@ function openModal(index) {
   showNavArrows();
   modal.style.display = 'flex';
   
-  // Włącz animację
   setTimeout(() => {
     modalImg.style.transition = 'all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)';
   }, 50);
@@ -61,7 +103,6 @@ function showNavArrows() {
   document.getElementById('navRight').classList.toggle('hidden', !hasNext);
 }
 
-// ✅ PERFEKCYJNA ANIMACJA - JEDNO ZDJĘCIE
 function slidePhoto(direction) {
   if (isAnimating) return;
   
@@ -71,21 +112,16 @@ function slidePhoto(direction) {
   isAnimating = true;
   const modalImg = document.getElementById('modalImg');
   
-  // 1. KROK: Stare zdjęcie UCIEKA (szybko)
   const exitDirection = direction > 0 ? '-130%' : '130%';
   modalImg.style.transition = 'transform 0.25s ease-out';
   modalImg.style.transform = `translateX(${exitDirection})`;
   
-  // 2. KROK: NOWE zdjęcie (poza ekranem, bez animacji)
   setTimeout(() => {
     modalImg.src = `/photos/${allPhotos[nextIndex]}`;
     modalImg.style.transition = 'none';
-    
-    // Pozycja START dla nowego zdjęcia (odwrotna strona)
     const entryDirection = direction > 0 ? '130%' : '-130%';
     modalImg.style.transform = `translateX(${entryDirection})`;
     
-    // 3. KROK: Płynne WEJŚCIE
     setTimeout(() => {
       modalImg.style.transition = 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
       modalImg.style.transform = 'translateX(0)';
@@ -94,16 +130,15 @@ function slidePhoto(direction) {
       updateCounter();
       showNavArrows();
     }, 20);
-    
   }, 250);
   
-  // Gotowe na następny swipe
   setTimeout(() => {
     isAnimating = false;
   }, 600);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Event listeners (bez zmian)
   document.getElementById('navLeft').onclick = () => slidePhoto(-1);
   document.getElementById('navRight').onclick = () => slidePhoto(1);
   
@@ -117,7 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
   
-  // SWIPE
   const modal = document.getElementById('modal');
   modal.addEventListener('touchstart', (e) => {
     if (isAnimating) return;
@@ -140,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const deltaY = Math.abs(startY - endY);
     
     if (Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaX) > deltaY) {
-      slidePhoto(deltaX > 0 ? 1 : -1); // Lewo=następne, Prawo=poprzednie
+      slidePhoto(deltaX > 0 ? 1 : -1);
     }
     isSwiping = false;
   }, { passive: true });

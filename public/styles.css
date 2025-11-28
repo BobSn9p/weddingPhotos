@@ -155,3 +155,14 @@ button:hover {
   font-style: italic;
   margin-top: 20px;
 }
+
+.gallery-image {
+  background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+  transition: background 0.3s ease;
+}
+
+.gallery-image[src] {
+  background: none !important;
+}
+
+
