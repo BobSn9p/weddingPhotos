@@ -23,15 +23,22 @@ app.use(express.json());
 app.get('/photos', (req, res) => {
   try {
     const files = fs.readdirSync('public/photos');
-    // Tylko obrazy
     const images = files.filter(name => /\.(jpg|jpeg|png|gif|webp)$/i.test(name));
-    console.log(`Załadowano ${images.length} zdjęć z folderu`);
+    
+    // ✅ ODWÓTNIEJ KOLEJNOŚĆ - NAJNOWSZE NA GÓRZE!
+    images.sort((a, b) => {
+      return fs.statSync(path.join('public/photos', b)).mtime.getTime() - 
+             fs.statSync(path.join('public/photos', a)).mtime.getTime();
+    });
+    
+    console.log(`Załadowano ${images.length} zdjęć (najnowsze na górze)`);
     res.json(images);
   } catch (err) {
     console.error('Błąd odczytu folderu:', err);
     res.json([]);
   }
 });
+
 
 app.post('/upload', upload.single('photo'), async (req, res) => {
   try {
