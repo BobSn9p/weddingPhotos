@@ -77,24 +77,52 @@ function renderNextBatch(gallery) {
   scrollObserver.observe(sentinel);
 }
 
-function getImageUrl(photoName) {
-  return `/photos/${photoName}`;
+function getImageUrl(photo) {
+  return `/photos/${photo.filename}`;
 }
 
 function createImageElement(container, index) {
+  const photo = allPhotos[index];
+  
+  const wrapper = document.createElement('div');
+  wrapper.style.display = 'flex';
+  wrapper.style.flexDirection = 'column';
+  wrapper.style.alignItems = 'center';
+  wrapper.style.marginBottom = '20px';
+
   const img = document.createElement('img');
   img.dataset.index = index;
   img.alt = `Zdjęcie ${index + 1}`;
   img.style.cursor = 'pointer';
   img.className = 'gallery-image';
-  img.addEventListener('click', () => openModal(index));
   img.style.background = '#f0f0f0';
   img.style.minHeight = '200px';
-  container.insertBefore(img, container.querySelector('.sentinel'));
+  img.addEventListener('click', () => openModal(index));
+  wrapper.appendChild(img);
   
+  // ✅ OBSERWUJ IMG PRZED dodaniem życzeń
   imageObserver.observe(img);
-  return img;
+
+  // ✅ DODAJ ŻYCZENIA (jeśli są)
+  if (photo.message && photo.message.trim() !== '') {
+    const wishes = document.createElement('div');
+    wishes.textContent = `💬 ${photo.message}`;
+    wishes.style.marginTop = '10px';
+    wishes.style.padding = '8px 14px';
+    wishes.style.background = '#f8f9fa';
+    wishes.style.boxShadow = '0 2px 12px rgba(0,0,0,0.07)';
+    wishes.style.borderRadius = '7px';
+    wishes.style.maxWidth = '300px';
+    wishes.style.fontSize = '15px';
+    wishes.style.wordBreak = 'break-word';
+    wrapper.appendChild(wishes); // ✅ DODANE DO WRAPPERA
+    console.log('Dodano życzenia:', photo.message); // DEBUG
+  }
+  
+  // ✅ DODAJ CAŁY WRAPPER DO KONTENERA
+  container.insertBefore(wrapper, container.querySelector('.sentinel'));
 }
+
 
 function openModal(index) {
   currentPhotoIndex = index;
