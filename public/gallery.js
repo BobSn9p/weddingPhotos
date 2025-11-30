@@ -137,7 +137,7 @@ function showWishesOverlay(index) {
   const wishesBox = document.createElement('div');
   wishesBox.style.cssText = `
     background: white; padding: 40px; border-radius: 20px;
-    max-width: 500px; max-height: 80vh; overflow-y: auto;
+    max-width: 90vw; max-height: 85vh; overflow-y: auto;
     text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     animation: slideIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   `;
@@ -146,10 +146,18 @@ function showWishesOverlay(index) {
     <div style="font-size: 24px; margin-bottom: 20px; color: #333;">
       💝 Życzenia
     </div>
-    <div style="
+    <div id="wishesText" style="
       font-size: 20px; line-height: 1.6; color: #444; 
-      padding: 20px; background: #f8f9fa; border-radius: 12px;
+      padding: 25px; background: #f8f9fa; border-radius: 12px;
       border-left: 5px solid #007bff;
+      ${/* ✅ ZAWIJANIE TEXTU */ `
+        word-wrap: break-word; 
+        overflow-wrap: break-word; 
+        white-space: pre-wrap; 
+        text-align: left; 
+        max-height: 60vh; 
+        overflow-y: auto;
+      `}
     ">
       ${photo.message}
     </div>
@@ -168,6 +176,7 @@ function showWishesOverlay(index) {
   overlay.appendChild(wishesBox);
   document.body.appendChild(overlay);
 }
+
 
 function openModal(index) {
   currentPhotoIndex = index;
