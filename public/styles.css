@@ -176,5 +176,163 @@ button:hover {
   box-shadow: 0 2px 8px rgba(255,107,107,0.3);
 }
 
+.modal { 
+      position: fixed; 
+      z-index: 1000; 
+      left: 0; top: 0; 
+      width: 100%; height: 100%; 
+      overflow: hidden;
+      background-color: rgba(0,0,0,0.9); 
+      display: none; 
+      justify-content: center; 
+      align-items: center; 
+      touch-action: pan-y;
+    }
+    
+    .modal-slideshow {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content { 
+      position: absolute;
+      max-width: 95%; 
+      max-height: 95%; 
+      border-radius: 8px; 
+      box-shadow: 0 4px 25px rgba(0,0,0,0.5);
+      user-select: none;
+      -webkit-user-drag: none;
+      will-change: transform;
+    }
+    
+    .modal-close { 
+      position: fixed; 
+      top: 20px; right: 20px; 
+      color: white; 
+      font-size: 36px; 
+      font-weight: bold; 
+      cursor: pointer; 
+      user-select: none; 
+      z-index: 1001;
+      padding: 10px;
+    }
+    
+    /* Strzałki - UKRYTE na mobile */
+    .nav-arrow {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.5);
+      color: white;
+      font-size: 28px;
+      width: 50px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      z-index: 1001;
+    }
+    .nav-arrow:hover { 
+      background: rgba(0,0,0,0.8); 
+      transform: translateY(-50%) scale(1.1); 
+    }
+    .nav-left { left: 15px; }
+    .nav-right { right: 15px; }
+    .nav-arrow.hidden { display: none; }
+    
+    /* MOBILE: ukryj strzałki */
+    @media (max-width: 768px) {
+      .nav-arrow {
+        display: none !important;
+      }
+    }
+    
+    /* DESKTOP: pokaż strzałki */
+    @media (min-width: 769px) {
+      .nav-arrow {
+        display: flex;
+      }
+    }
+    
+    .photo-counter {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 16px;
+      z-index: 1001;
+    }
+    
+ .wish-section { 
+      margin-top: 30px; 
+      padding: 25px; 
+      border: 2px dashed #007bff; 
+      border-radius: 12px; 
+      background: #f8f9ff;
+    }
+    .wish-input { 
+      width: 80%; 
+      height: 50px; 
+      padding: 15px; 
+      border: 2px solid #e0e0e0; 
+      border-radius: 8px; 
+      font-size: 16px; 
+      resize: none;
+      font-family: inherit;
+    }
+    .wish-input:focus { 
+      border-color: #007bff; 
+      outline: none; 
+      box-shadow: 0 0 0 3px rgba(0,123,255,0.1); 
+    }
+    .char-counter { 
+      text-align: right; 
+      margin-top: 5px; 
+      color: #666; 
+      font-size: 14px; 
+    }
+    .char-limit { color: #007bff; font-weight: bold; }
+    .wish-btn { 
+      margin-top: 20px; 
+      width: 100%; 
+      padding: 15px; 
+      background: linear-gradient(135deg, #28a745, #20c997); 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      font-size: 16px; 
+      cursor: pointer;
+    }
+    .wish-btn:hover { opacity: 0.9; }
+    .preview-container { 
+      margin: 20px 0; 
+      text-align: center; 
+    }
+    .preview-img { 
+      max-width: 200px; 
+      max-height: 200px; 
+      border-radius: 8px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+    }
 
-
+  button:disabled,
+  button:disabled:hover,
+  button:disabled:focus,
+  button:disabled:active {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    background: #ccc !important;
+  }
