@@ -165,4 +165,16 @@ button:hover {
   background: none !important;
 }
 
+/* Dodaj do gallery.html <style> jeśli chcesz */
+.wishes-badge {
+  background: linear-gradient(135deg, #ff6b6b, #feca57);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(255,107,107,0.3);
+}
+
+
 

@@ -11,6 +11,7 @@ let imageObserver = null;
 async function loadPhotos() {
   const res = await fetch('/photos');
   allPhotos = await res.json();
+  console.log('API zwraca:', allPhotos);
   const gallery = document.getElementById('gallery');
   const noPhotos = document.getElementById('noPhotos');
   
@@ -26,46 +27,28 @@ async function loadPhotos() {
   console.log('Załadowano zdjęć:', allPhotos.length);
   
   initObservers(gallery);
-  renderNextBatch(gallery); // Pierwsza paczka
+  renderNextBatch(gallery);
 }
 
 function initObservers(gallery) {
-  // Observer dla lazy loading OBRAZKÓW
   imageObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const img = entry.target;
         const index = parseInt(img.dataset.index);
-        if (!img.src || img.src === '') {
-          img.src = getImageUrl(allPhotos[index]);
-          img.loading = 'lazy';
-        }
+        img.src = `/photos/${allPhotos[index].filename}`;
+        img.loading = 'lazy';
       }
     });
   }, { rootMargin: '100px', threshold: 0.1 });
   
-  // Observer dla przewijania (SENTINEL na dole)
   scrollObserver = new IntersectionObserver((entries) => {
     const sentinel = entries[0];
     if (sentinel.isIntersecting && renderedCount < allPhotos.length) {
       renderNextBatch(sentinel.target.parentNode);
     }
   }, { threshold: 0 });
-}
-
-function renderNextBatch(gallery) {
-  const startIndex = renderedCount;
-  const endIndex = Math.min(startIndex + BATCH_SIZE, allPhotos.length);
   
-  // Dodaj obrazki
-  for (let i = startIndex; i < endIndex; i++) {
-    createImageElement(gallery, i);
-  }
-  
-  renderedCount = endIndex;
-  console.log(`Wygenerowano ${renderedCount}/${allPhotos.length}`);
-  
-  // Dodaj lub zaktualizuj SENTINEL (niewidoczny trigger)
   let sentinel = gallery.querySelector('.sentinel');
   if (!sentinel) {
     sentinel = document.createElement('div');
@@ -73,67 +56,130 @@ function renderNextBatch(gallery) {
     sentinel.style.height = '1px';
     gallery.appendChild(sentinel);
   }
-  
-  scrollObserver.observe(sentinel);
 }
 
-function getImageUrl(photo) {
-  return `/photos/${photo.filename}`;
+function renderNextBatch(gallery) {
+  const startIndex = renderedCount;
+  const endIndex = Math.min(startIndex + BATCH_SIZE, allPhotos.length);
+  
+  for (let i = startIndex; i < endIndex; i++) {
+    createImageElement(gallery, i);
+  }
+  
+  renderedCount = endIndex;
+  scrollObserver.observe(gallery.querySelector('.sentinel'));
 }
 
 function createImageElement(container, index) {
   const photo = allPhotos[index];
   
   const wrapper = document.createElement('div');
-  wrapper.style.display = 'flex';
-  wrapper.style.flexDirection = 'column';
-  wrapper.style.alignItems = 'center';
-  wrapper.style.marginBottom = '20px';
+  wrapper.style.cssText = `
+    display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;
+  `;
 
   const img = document.createElement('img');
   img.dataset.index = index;
   img.alt = `Zdjęcie ${index + 1}`;
-  img.style.cursor = 'pointer';
+  img.style.cssText = `
+    cursor: pointer; background: #f0f0f0; min-height: 200px;
+  `;
   img.className = 'gallery-image';
-  img.style.background = '#f0f0f0';
-  img.style.minHeight = '200px';
   img.addEventListener('click', () => openModal(index));
   wrapper.appendChild(img);
-  
-  // ✅ OBSERWUJ IMG PRZED dodaniem życzeń
   imageObserver.observe(img);
 
-  // ✅ DODAJ ŻYCZENIA (jeśli są)
+  // ✅ KLIKALNY BADGE "Z życzeniami"
   if (photo.message && photo.message.trim() !== '') {
-    const wishes = document.createElement('div');
-    wishes.textContent = `💬 ${photo.message}`;
-    wishes.style.marginTop = '10px';
-    wishes.style.padding = '8px 14px';
-    wishes.style.background = '#f8f9fa';
-    wishes.style.boxShadow = '0 2px 12px rgba(0,0,0,0.07)';
-    wishes.style.borderRadius = '7px';
-    wishes.style.maxWidth = '300px';
-    wishes.style.fontSize = '15px';
-    wishes.style.wordBreak = 'break-word';
-    wrapper.appendChild(wishes); // ✅ DODANE DO WRAPPERA
-    console.log('Dodano życzenia:', photo.message); // DEBUG
+    const badge = document.createElement('div');
+    badge.textContent = 'Z życzeniami';
+    badge.style.cssText = `
+      margin-top: 10px; padding: 8px 16px; 
+      background: linear-gradient(135deg, #007bff, #0056b3); 
+      color: white; border-radius: 25px; font-size: 14px; 
+      font-weight: 600; box-shadow: 0 3px 12px rgba(0,123,255,0.4);
+      cursor: pointer; transition: all 0.2s ease; user-select: none;
+    `;
+    badge.addEventListener('mouseenter', () => {
+      badge.style.transform = 'scale(1.05)';
+      badge.style.background = 'linear-gradient(135deg, #0056b3, #004494)';
+    });
+    badge.addEventListener('mouseleave', () => {
+      badge.style.transform = 'scale(1)';
+      badge.style.background = 'linear-gradient(135deg, #007bff, #0056b3)';
+    });
+    badge.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showWishesOverlay(index);
+    });
+    wrapper.appendChild(badge);
   }
   
-  // ✅ DODAJ CAŁY WRAPPER DO KONTENERA
   container.insertBefore(wrapper, container.querySelector('.sentinel'));
 }
 
+function showWishesOverlay(index) {
+  const photo = allPhotos[index];
+  
+  // Usuń poprzedni overlay
+  const existingOverlay = document.getElementById('wishesOverlay');
+  if (existingOverlay) existingOverlay.remove();
+  
+  const overlay = document.createElement('div');
+  overlay.id = 'wishesOverlay';
+  overlay.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); z-index: 2000;
+    display: flex; justify-content: center; align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  `;
+  
+  const wishesBox = document.createElement('div');
+  wishesBox.style.cssText = `
+    background: white; padding: 40px; border-radius: 20px;
+    max-width: 500px; max-height: 80vh; overflow-y: auto;
+    text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    animation: slideIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  `;
+  
+  wishesBox.innerHTML = `
+    <div style="font-size: 24px; margin-bottom: 20px; color: #333;">
+      💝 Życzenia
+    </div>
+    <div style="
+      font-size: 20px; line-height: 1.6; color: #444; 
+      padding: 20px; background: #f8f9fa; border-radius: 12px;
+      border-left: 5px solid #007bff;
+    ">
+      ${photo.message}
+    </div>
+    <button onclick="document.getElementById('wishesOverlay').remove()" 
+      style="
+        margin-top: 25px; padding: 12px 30px; background: #007bff;
+        color: white; border: none; border-radius: 25px; font-size: 16px;
+        cursor: pointer; transition: background 0.2s;
+      "
+      onmouseover="this.style.background='#0056b3'"
+      onmouseout="this.style.background='#007bff'">
+      Zamknij
+    </button>
+  `;
+  
+  overlay.appendChild(wishesBox);
+  document.body.appendChild(overlay);
+}
 
 function openModal(index) {
   currentPhotoIndex = index;
   const modalImg = document.getElementById('modalImg');
   const modal = document.getElementById('modal');
   
-  console.log('Otwieram:', getImageUrl(allPhotos[currentPhotoIndex]));
+  const photo = allPhotos[currentPhotoIndex];
+  console.log('Otwieram modal:', photo.filename);
   
   modalImg.style.transition = 'none';
   modalImg.style.transform = 'translateX(0) scale(1)';
-  modalImg.src = getImageUrl(allPhotos[currentPhotoIndex]);
+  modalImg.src = `/photos/${photo.filename}`;
   
   updateCounter();
   showNavArrows();
@@ -169,7 +215,7 @@ function slidePhoto(direction) {
   modalImg.style.transform = `translateX(${exitDirection})`;
   
   setTimeout(() => {
-    modalImg.src = getImageUrl(allPhotos[nextIndex]);
+    modalImg.src = `/photos/${allPhotos[nextIndex].filename}`;
     modalImg.style.transition = 'none';
     const entryDirection = direction > 0 ? '130%' : '-130%';
     modalImg.style.transform = `translateX(${entryDirection})`;
@@ -189,7 +235,6 @@ function slidePhoto(direction) {
   }, 600);
 }
 
-// Event listeners (bez zmian)
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('navLeft').onclick = () => slidePhoto(-1);
   document.getElementById('navRight').onclick = () => slidePhoto(1);
