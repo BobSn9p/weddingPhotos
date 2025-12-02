@@ -32,19 +32,19 @@ document.addEventListener('DOMContentLoaded', () => {
       bulkBtn.disabled = true;
       bulkBtn.style.opacity = '0.5';
     } else if (hasFiles) {
-    // ✅ POLSKA DEKLINACJA
-    let photosText = '';
-    if (fileCount === 1) {
-      photosText = '1 zdjęcie';
-    } else if (fileCount % 10 >= 2 && fileCount % 10 <= 4 && (fileCount < 10 || fileCount > 20)) {
-      photosText = `${fileCount} zdjęcia`;
-    } else {
-      photosText = `${fileCount} zdjęć`;
-    }
-    
-    statusEl.textContent = `✅ Gotowe: ${photosText}`;
-    bulkBtn.disabled = false;
-    bulkBtn.style.opacity = '1';
+      // ✅ POLSKA DEKLINACJA
+      let photosText = '';
+      if (fileCount === 1) {
+        photosText = '1 zdjęcie';
+      } else if (fileCount % 10 >= 2 && fileCount % 10 <= 4 && (fileCount < 10 || fileCount > 20)) {
+        photosText = `${fileCount} zdjęcia`;
+      } else {
+        photosText = `${fileCount} zdjęć`;
+      }
+      
+      statusEl.textContent = `✅ Gotowe: ${photosText}`;
+      bulkBtn.disabled = false;
+      bulkBtn.style.opacity = '1';
     } else {
       statusEl.textContent = '';
       bulkBtn.disabled = true;
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     wishBtn.style.cursor = isValid ? 'pointer' : 'not-allowed';
   }
 
-  // ✅ BULK UPLOAD - ANALOGICZNIE DO ŻYCZEŃ
+  // ✅ BULK UPLOAD z CZYSZCZENIEM PODGLĄDU
   bulkForm.onsubmit = async (e) => {
     e.preventDefault();
     const input = document.getElementById('photoInput');
@@ -83,9 +83,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
     }
-
-    // ✅ ANALOGICZNIE DO ŻYCZEŃ: wyczyszczenie + komunikat + przycisk nieaktywny
+    
+    // ✅ CZYSZCZENIE + PODGLĄD
     input.value = '';
+    
+    // 🔹 USUŃ PODGLĄD MINIATUR
+    const bulkPreviewContainer = document.getElementById('bulkPreviewContainer');
+    if (bulkPreviewContainer) {
+      bulkPreviewContainer.innerHTML = '';
+      bulkPreviewContainer.style.display = 'none';
+    }
+    
     statusEl.innerHTML = '✅ Zdjęcia przesłane pomyślnie!';
     bulkBtn.disabled = true;  // ✅ PRZYCISK NIEAKTYWNY
     bulkBtn.style.opacity = '0.5';
@@ -122,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Preview
+  // Preview ŻYCZENIA (bez zmian)
   document.getElementById('wishInput').onchange = (e) => {
     const file = e.target.files[0];
     const previewContainer = document.getElementById('previewContainer');
@@ -139,4 +147,32 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('wishMessage').oninput = (e) => {
     document.getElementById('charCount').textContent = e.target.value.length;
   };
+
+  // ✅ PODGLĄD BULK (miniatury wielu zdjęć)
+  document.getElementById('photoInput').addEventListener('change', (e) => {
+    const files = e.target.files;
+    const previewContainer = document.getElementById('bulkPreviewContainer');
+    previewContainer.innerHTML = ''; // wyczyść poprzedni podgląd
+
+    if (files.length === 0) {
+      previewContainer.style.display = 'none';
+      return;
+    }
+
+    previewContainer.style.display = 'flex';
+
+    Array.from(files).forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+
+      const img = document.createElement('img');
+      img.style.width = '100px';
+      img.style.height = '100px';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '8px';
+      img.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+      img.src = URL.createObjectURL(file);
+
+      previewContainer.appendChild(img);
+    });
+  });
 });
