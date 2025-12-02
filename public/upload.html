@@ -13,7 +13,7 @@
       <!-- Wiele zdjęć -->
       <form id="bulkUploadForm">
         <h3>Zdjęcia (maks. 10 jednocześnie)</h3>
-        <input type="file" id="photoInput" accept="image/*" name="photo" multiple required />
+        <input type="file" id="photoInput" accept="image/*" name="photo" multiple required autocomplete="off" />
         
         <button type="submit">Dodaj wiele zdjęć</button>
       </form>
@@ -24,7 +24,7 @@
       <div class="wish-section">
         <h3>💝 Zdjęcie z życzeniami</h3>
         <form id="wishUploadForm">
-          <input type="file" id="wishInput" accept="image/*" required />
+          <input type="file" id="wishInput" accept="image/*" required autocomplete="off" />
           <div
             class="preview-container"
             id="previewContainer"

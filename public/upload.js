@@ -7,6 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const photoInput = document.getElementById('photoInput');
   const wishInput = document.getElementById('wishInput');
   const wishMessage = document.getElementById('wishMessage');
+  photoInput.value = '';  // Reset bulk
+  wishInput.value = '';   // Reset życzeń
+  wishMessage.value = ''; // Reset treści życzeń
+  document.getElementById('charCount').textContent = '0';
 
   // INICJALIZUJ PRZYCISKI
   bulkBtn.disabled = true;
@@ -111,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
       wishMessageEl.value = '';
       document.getElementById('previewContainer').style.display = 'none';
       statusEl.innerHTML = '💝 Zdjęcie z życzeniami przesłane pomyślnie!';
+      document.getElementById('charCount').textContent = '0';
       toggleWishBtn(); // ✅ PRZYCISK NIEAKTYWNY (automatycznie)
     } else {
       statusEl.textContent = 'Błąd!';
