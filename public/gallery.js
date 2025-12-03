@@ -1,9 +1,9 @@
+const SWIPE_THRESHOLD = 50;
+const BATCH_SIZE = 20;
 let allPhotos = [];
 let currentPhotoIndex = 0;
 let isAnimating = false;
 let startX = 0, startY = 0, isSwiping = false;
-const SWIPE_THRESHOLD = 50;
-const BATCH_SIZE = 20;
 let renderedCount = 0;
 let scrollObserver = null;
 let imageObserver = null;

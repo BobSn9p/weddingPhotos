@@ -26,7 +26,7 @@ h1 {
   font-size: 28px;
 }
 
-/* NOWE style dla przycisków głównych */
+/* Przyciski na main page index*/
 .main-buttons {
   display: flex;
   flex-direction: column;
@@ -64,8 +64,9 @@ h1 {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(108,117,125,0.3);
 }
+/* Koniec */
 
-/* Przycisk powrotu */
+/* Przycisk powrotu gallery upload */
 .back-btn {
   display: inline-block;
   margin-bottom: 25px;
@@ -78,6 +79,9 @@ h1 {
   text-decoration: underline;
 }
 
+/* Koniec */
+
+/* Formularze dodawania zdjęć upload */
 form {
   margin-bottom: 25px;
 }
@@ -89,6 +93,10 @@ input[type="file"] {
   border-radius: 8px;
   background: #fafafa;
 }
+
+/* Koniec */
+
+/* Galeria gallery */
 
 #gallery {
   display: flex;
@@ -117,6 +125,9 @@ input[type="file"] {
   box-shadow: 0 12px 30px rgba(0,0,0,0.25);
 }
 
+/* Koniec */
+
+/* Przesyłanie zdjęć upload */
 button {
   cursor: pointer;
   padding: 12px 30px;
@@ -144,38 +155,32 @@ button:enabled:hover {
 #status:empty {
   display: none;
 }
+/* Koniec */
 
+/* Wybierz opcje aby rozpoczac index */
 .info {
   color: #666;
   font-style: italic;
 }
 
+/* Brak przesłanych zdjęć gallery */
 #noPhotos {
   color: #666;
   font-style: italic;
   margin-top: 20px;
 }
 
-.gallery-image {
+/* .gallery-image {
   background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
   transition: background 0.3s ease;
-}
+} */
 
-.gallery-image[src] {
+/* .gallery-image[src] {
   background: none !important;
-}
+} */
 
-/* Dodaj do gallery.html <style> jeśli chcesz */
-.wishes-badge {
-  background: linear-gradient(135deg, #ff6b6b, #feca57);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(255,107,107,0.3);
-}
 
+/* Galeria zdjęć gallery */
 .modal { 
       position: fixed; 
       z-index: 1000; 
@@ -220,8 +225,10 @@ button:enabled:hover {
       z-index: 1001;
       padding: 10px;
     }
+
+    /* Koniec */
     
-    /* Strzałki - UKRYTE na mobile */
+    /* Strzałki - UKRYTE na mobile gallery */
     .nav-arrow {
       position: fixed;
       top: 50%;
@@ -262,6 +269,7 @@ button:enabled:hover {
       }
     }
     
+    /* Licznik zdjęć gallery */
     .photo-counter {
       position: fixed;
       bottom: 30px;
@@ -275,6 +283,9 @@ button:enabled:hover {
       z-index: 1001;
     }
     
+    /* Koniec */
+
+    /* Dodawanie zdjęć upload */
  .wish-section { 
       margin-top: 30px; 
       padding: 25px; 
@@ -336,3 +347,5 @@ button:enabled:hover {
     transform: none !important;
     background: #ccc !important;
   }
+
+  /* Koniec */

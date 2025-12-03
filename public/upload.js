@@ -1,178 +1,194 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Pobierz elementy
+  // =========================================================================
+  // 1. INICJALIZACJA ELEMENTÓW + RESET
+  // =========================================================================
   const bulkForm = document.getElementById('bulkUploadForm');
   const wishForm = document.getElementById('wishUploadForm');
+  const statusEl = document.getElementById('status');
+  
   const bulkBtn = bulkForm.querySelector('button[type="submit"]');
   const wishBtn = wishForm.querySelector('button[type="submit"]');
   const photoInput = document.getElementById('photoInput');
   const wishInput = document.getElementById('wishInput');
   const wishMessage = document.getElementById('wishMessage');
-  photoInput.value = '';  // Reset bulk
-  wishInput.value = '';   // Reset życzeń
-  wishMessage.value = ''; // Reset treści życzeń
-  document.getElementById('charCount').textContent = '0';
+  const charCount = document.getElementById('charCount');
+  const bulkPreviewContainer = document.getElementById('bulkPreviewContainer');
+  const wishPreviewContainer = document.getElementById('previewContainer');
 
-  // INICJALIZUJ PRZYCISKI
+  // Reset na starcie (po odświeżeniu)
+  resetBulkForm();
+  resetWishForm();
+
+  // Inicjalizuj przyciski jako nieaktywne
   bulkBtn.disabled = true;
   wishBtn.disabled = true;
 
-  // WALIDACJA BULK UPLOAD
-  photoInput.addEventListener('change', toggleBulkBtn);
-  function toggleBulkBtn() {
+  // =========================================================================
+  // 2. WALIDACJA + EVENT LISTENERY
+  // =========================================================================
+  
+  // Bulk upload walidacja + podgląd
+  photoInput.addEventListener('change', handleBulkInputChange);
+  
+  // Życzenia walidacja
+  wishInput.addEventListener('change', handleWishInputChange);
+  wishMessage.addEventListener('input', handleWishInputChange);
+
+  // =========================================================================
+  // 3. FUNKCJE WALIDACYJNE
+  // =========================================================================
+  
+  function handleBulkInputChange() {
     const fileCount = photoInput.files.length;
-    const hasFiles = fileCount > 0;
-    const tooManyFiles = fileCount > 10;
     
-    const statusEl = document.getElementById('status');
-    
-    if (tooManyFiles) {
+    if (fileCount > 10) {
       alert(`⚠️ Maksymalnie 10 zdjęć!\nWybrano: ${fileCount}\nPonownie wybierz zdjęcia`);
-      photoInput.value = '';
+      resetBulkForm();
       statusEl.textContent = '⚠️ Wybierz maksymalnie 10 zdjęć';
-      bulkBtn.disabled = true;
-      bulkBtn.style.opacity = '0.5';
-    } else if (hasFiles) {
-      // ✅ POLSKA DEKLINACJA
-      let photosText = '';
-      if (fileCount === 1) {
-        photosText = '1 zdjęcie';
-      } else if (fileCount % 10 >= 2 && fileCount % 10 <= 4 && (fileCount < 10 || fileCount > 20)) {
-        photosText = `${fileCount} zdjęcia`;
-      } else {
-        photosText = `${fileCount} zdjęć`;
-      }
-      
-      statusEl.textContent = `✅ Gotowe: ${photosText}`;
+      return;
+    }
+    
+    if (fileCount > 0) {
+      showBulkPreview();
+      updateBulkStatus(fileCount);
       bulkBtn.disabled = false;
       bulkBtn.style.opacity = '1';
     } else {
-      statusEl.textContent = '';
-      bulkBtn.disabled = true;
-      bulkBtn.style.opacity = '0.5';
+      resetBulkForm();
     }
   }
 
-  // WALIDACJA ŻYCZEŃ
-  wishInput.addEventListener('change', toggleWishBtn);
-  wishMessage.addEventListener('input', toggleWishBtn);
-  function toggleWishBtn() {
+  function handleWishInputChange() {
     const hasPhoto = wishInput.files.length > 0;
     const hasText = wishMessage.value.trim().length > 0;
-    const isValid = hasPhoto && hasText;
     
-    wishBtn.disabled = !isValid;
-    wishBtn.style.opacity = isValid ? '1' : '0.5';
-    wishBtn.style.cursor = isValid ? 'pointer' : 'not-allowed';
+    wishBtn.disabled = !(hasPhoto && hasText);
+    wishBtn.style.opacity = (hasPhoto && hasText) ? '1' : '0.5';
+    wishBtn.style.cursor = (hasPhoto && hasText) ? 'pointer' : 'not-allowed';
   }
 
-  // ✅ BULK UPLOAD z CZYSZCZENIEM PODGLĄDU
-  bulkForm.onsubmit = async (e) => {
-    e.preventDefault();
-    const input = document.getElementById('photoInput');
-    const statusEl = document.getElementById('status');
-
-    statusEl.textContent = 'Przesyłanie...';
-
-    for (let file of input.files) {
-      const formData = new FormData();
-      formData.append('photo', file);
-
-      const res = await fetch('/upload', { method: 'POST', body: formData });
-      if (!res.ok) {
-        statusEl.textContent = 'Błąd: ' + (await res.text());
-        return;
-      }
+  function updateBulkStatus(count) {
+    let photosText = '';
+    if (count === 1) {
+      photosText = '1 zdjęcie';
+    } else if (count % 10 >= 2 && count % 10 <= 4 && (count < 10 || count > 20)) {
+      photosText = `${count} zdjęcia`;
+    } else {
+      photosText = `${count} zdjęć`;
     }
-    
-    // ✅ CZYSZCZENIE + PODGLĄD
-    input.value = '';
-    
-    // 🔹 USUŃ PODGLĄD MINIATUR
-    const bulkPreviewContainer = document.getElementById('bulkPreviewContainer');
+    statusEl.textContent = `✅ Gotowe: ${photosText}`;
+  }
+
+  // =========================================================================
+  // 4. FUNKCJE RESET
+  // =========================================================================
+  
+  function resetBulkForm() {
+    photoInput.value = '';
     if (bulkPreviewContainer) {
       bulkPreviewContainer.innerHTML = '';
       bulkPreviewContainer.style.display = 'none';
     }
-    
-    statusEl.innerHTML = '✅ Zdjęcia przesłane pomyślnie!';
-    bulkBtn.disabled = true;  // ✅ PRZYCISK NIEAKTYWNY
+    statusEl.textContent = '';
+    bulkBtn.disabled = true;
     bulkBtn.style.opacity = '0.5';
-  };
+  }
 
-  // Życzenia (bez zmian)
-  wishForm.onsubmit = async (e) => {
-    e.preventDefault();
-    const wishInputEl = document.getElementById('wishInput');
-    const wishMessageEl = document.getElementById('wishMessage');
-    const statusEl = document.getElementById('status');
+  function resetWishForm() {
+    wishInput.value = '';
+    wishMessage.value = '';
+    charCount.textContent = '0';
+    if (wishPreviewContainer) wishPreviewContainer.style.display = 'none';
+  }
 
-    if (!wishInputEl.files[0]) {
-      statusEl.textContent = 'Wybierz zdjęcie!';
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('photo', wishInputEl.files[0]);
-    formData.append('message', wishMessageEl.value.trim());
-
-    statusEl.textContent = 'Przesyłanie życzeń...';
-
-    const res = await fetch('/upload', { method: 'POST', body: formData });
-    if (res.ok) {
-      wishInputEl.value = '';
-      wishMessageEl.value = '';
-      document.getElementById('previewContainer').style.display = 'none';
-      statusEl.innerHTML = '💝 Zdjęcie z życzeniami przesłane pomyślnie!';
-      document.getElementById('charCount').textContent = '0';
-      toggleWishBtn(); // ✅ PRZYCISK NIEAKTYWNY (automatycznie)
-    } else {
-      statusEl.textContent = 'Błąd!';
-    }
-  };
-
-  // Preview ŻYCZENIA (bez zmian)
-  document.getElementById('wishInput').onchange = (e) => {
-    const file = e.target.files[0];
-    const previewContainer = document.getElementById('previewContainer');
-    const previewImg = document.getElementById('previewImg');
-    if (file) {
-      previewImg.src = URL.createObjectURL(file);
-      previewContainer.style.display = 'block';
-    } else {
-      previewContainer.style.display = 'none';
-    }
-  };
-
-  // Licznik
-  document.getElementById('wishMessage').oninput = (e) => {
-    document.getElementById('charCount').textContent = e.target.value.length;
-  };
-
-  // ✅ PODGLĄD BULK (miniatury wielu zdjęć)
-  document.getElementById('photoInput').addEventListener('change', (e) => {
-    const files = e.target.files;
-    const previewContainer = document.getElementById('bulkPreviewContainer');
-    previewContainer.innerHTML = ''; // wyczyść poprzedni podgląd
-
-    if (files.length === 0) {
-      previewContainer.style.display = 'none';
-      return;
-    }
-
-    previewContainer.style.display = 'flex';
+  function showBulkPreview() {
+    const files = photoInput.files;
+    if (!bulkPreviewContainer) return;
+    
+    bulkPreviewContainer.innerHTML = '';
+    bulkPreviewContainer.style.display = 'flex';
 
     Array.from(files).forEach(file => {
       if (!file.type.startsWith('image/')) return;
 
       const img = document.createElement('img');
-      img.style.width = '100px';
-      img.style.height = '100px';
-      img.style.objectFit = 'cover';
-      img.style.borderRadius = '8px';
-      img.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+      Object.assign(img.style, {
+        width: '100px',
+        height: '100px',
+        objectFit: 'cover',
+        borderRadius: '8px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+      });
       img.src = URL.createObjectURL(file);
-
-      previewContainer.appendChild(img);
+      bulkPreviewContainer.appendChild(img);
     });
-  });
+  }
+
+  // =========================================================================
+  // 5. SUBMIT HANDLERY
+  // =========================================================================
+  
+  bulkForm.onsubmit = async (e) => {
+    e.preventDefault();
+    statusEl.textContent = 'Przesyłanie...';
+
+    for (let file of photoInput.files) {
+      const formData = new FormData();
+      formData.append('photo', file);
+
+      const res = await fetch('/upload', { method: 'POST', body: formData });
+      if (!res.ok) {
+        statusEl.textContent = 'Błąd: ' + await res.text();
+        return;
+      }
+    }
+
+    resetBulkForm();
+    statusEl.innerHTML = '✅ Zdjęcia przesłane pomyślnie!';
+  };
+
+  wishForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const statusEl = document.getElementById('status');
+
+    if (!wishInput.files[0]) {
+      statusEl.textContent = 'Wybierz zdjęcie!';
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('photo', wishInput.files[0]);
+    formData.append('message', wishMessage.value.trim());
+
+    statusEl.textContent = 'Przesyłanie życzeń...';
+
+    const res = await fetch('/upload', { method: 'POST', body: formData });
+    if (res.ok) {
+      resetWishForm();
+      statusEl.innerHTML = '💝 Zdjęcie z życzeniami przesłane pomyślnie!';
+    } else {
+      statusEl.textContent = 'Błąd!';
+    }
+  };
+
+  // =========================================================================
+  // 6. PREVIEW + LICZNIK ŻYCZEŃ
+  // =========================================================================
+  
+  wishInput.onchange = (e) => {
+    const file = e.target.files[0];
+    if (wishPreviewContainer) {
+      const previewImg = document.getElementById('previewImg');
+      if (file) {
+        previewImg.src = URL.createObjectURL(file);
+        wishPreviewContainer.style.display = 'block';
+      } else {
+        wishPreviewContainer.style.display = 'none';
+      }
+    }
+  };
+
+  wishMessage.oninput = (e) => {
+    charCount.textContent = e.target.value.length;
+  };
 });

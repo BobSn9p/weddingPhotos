@@ -1,0 +1,107 @@
+
+/* Formularze dodawania zdjęć upload */
+form {
+  margin-bottom: 25px;
+}
+
+input[type="file"] {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+button {
+  cursor: pointer;
+  padding: 12px 30px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+button:enabled:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(40,167,69,0.3);
+}
+
+#status {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+#status:empty {
+  display: none;
+}
+
+/* Koniec */
+
+.wish-section { 
+      margin-top: 30px; 
+      padding: 25px; 
+      border: 2px dashed #007bff; 
+      border-radius: 12px; 
+      background: #f8f9ff;
+    }
+    .wish-input { 
+      width: 80%; 
+      height: 50px; 
+      padding: 15px; 
+      border: 2px solid #e0e0e0; 
+      border-radius: 8px; 
+      font-size: 16px; 
+      resize: none;
+      font-family: inherit;
+    }
+    .wish-input:focus { 
+      border-color: #007bff; 
+      outline: none; 
+      box-shadow: 0 0 0 3px rgba(0,123,255,0.1); 
+    }
+    .char-counter { 
+      text-align: right; 
+      margin-top: 5px; 
+      color: #666; 
+      font-size: 14px; 
+    }
+    .char-limit { color: #007bff; font-weight: bold; }
+    .wish-btn { 
+      margin-top: 20px; 
+      width: 100%; 
+      padding: 15px; 
+      background: linear-gradient(135deg, #28a745, #20c997); 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      font-size: 16px; 
+      cursor: pointer;
+    }
+    .wish-btn:hover { opacity: 0.9; }
+    .preview-container { 
+      margin: 20px 0; 
+      text-align: center; 
+    }
+    .preview-img { 
+      max-width: 200px; 
+      max-height: 200px; 
+      border-radius: 8px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+    }
+
+  button:disabled,
+  button:disabled:hover,
+  button:disabled:focus,
+  button:disabled:active {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    background: #ccc !important;
+  }
+
+  /* Koniec */
