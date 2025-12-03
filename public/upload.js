@@ -1,194 +1,259 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // =========================================================================
-  // 1. INICJALIZACJA ELEMENTÓW + RESET
-  // =========================================================================
+  // Pobierz elementy
   const bulkForm = document.getElementById('bulkUploadForm');
   const wishForm = document.getElementById('wishUploadForm');
-  const statusEl = document.getElementById('status');
-  
   const bulkBtn = bulkForm.querySelector('button[type="submit"]');
   const wishBtn = wishForm.querySelector('button[type="submit"]');
   const photoInput = document.getElementById('photoInput');
   const wishInput = document.getElementById('wishInput');
   const wishMessage = document.getElementById('wishMessage');
-  const charCount = document.getElementById('charCount');
+  const statusEl = document.getElementById('status');
   const bulkPreviewContainer = document.getElementById('bulkPreviewContainer');
-  const wishPreviewContainer = document.getElementById('previewContainer');
+  const previewContainer = document.getElementById('previewContainer');
+  const previewImg = document.getElementById('previewImg');
 
-  // Reset na starcie (po odświeżeniu)
-  resetBulkForm();
-  resetWishForm();
+  // Reset stanu na starcie
+  photoInput.value = '';
+  wishInput.value = '';
+  wishMessage.value = '';
+  document.getElementById('charCount').textContent = '0';
+  bulkPreviewContainer.innerHTML = '';
+  bulkPreviewContainer.style.display = 'none';
+  previewContainer.style.display = 'none';
+  previewImg.src = '';
 
-  // Inicjalizuj przyciski jako nieaktywne
+  // Inicjalizuj przyciski
   bulkBtn.disabled = true;
   wishBtn.disabled = true;
 
-  // =========================================================================
-  // 2. WALIDACJA + EVENT LISTENERY
-  // =========================================================================
-  
-  // Bulk upload walidacja + podgląd
-  photoInput.addEventListener('change', handleBulkInputChange);
-  
-  // Życzenia walidacja
-  wishInput.addEventListener('change', handleWishInputChange);
-  wishMessage.addEventListener('input', handleWishInputChange);
+  // Tablica wybranych plików dla bulk upload
+  let selectedFiles = [];
+  // Pojedynczy plik dla życzeń
+  let selectedWishFile = null;
 
-  // =========================================================================
-  // 3. FUNKCJE WALIDACYJNE
-  // =========================================================================
-  
-  function handleBulkInputChange() {
-    const fileCount = photoInput.files.length;
-    
-    if (fileCount > 10) {
-      alert(`⚠️ Maksymalnie 10 zdjęć!\nWybrano: ${fileCount}\nPonownie wybierz zdjęcia`);
-      resetBulkForm();
-      statusEl.textContent = '⚠️ Wybierz maksymalnie 10 zdjęć';
+  // WALIDACJA + PODGLĄD BULK UPLOAD
+  photoInput.addEventListener('change', (e) => {
+    selectedFiles = Array.from(e.target.files || []);
+    renderBulkPreview();
+    validateBulkButton();
+  });
+
+  function renderBulkPreview() {
+    bulkPreviewContainer.innerHTML = '';
+
+    if (selectedFiles.length === 0) {
+      bulkPreviewContainer.style.display = 'none';
       return;
     }
-    
-    if (fileCount > 0) {
-      showBulkPreview();
-      updateBulkStatus(fileCount);
-      bulkBtn.disabled = false;
-      bulkBtn.style.opacity = '1';
-    } else {
-      resetBulkForm();
-    }
-  }
 
-  function handleWishInputChange() {
-    const hasPhoto = wishInput.files.length > 0;
-    const hasText = wishMessage.value.trim().length > 0;
-    
-    wishBtn.disabled = !(hasPhoto && hasText);
-    wishBtn.style.opacity = (hasPhoto && hasText) ? '1' : '0.5';
-    wishBtn.style.cursor = (hasPhoto && hasText) ? 'pointer' : 'not-allowed';
-  }
-
-  function updateBulkStatus(count) {
-    let photosText = '';
-    if (count === 1) {
-      photosText = '1 zdjęcie';
-    } else if (count % 10 >= 2 && count % 10 <= 4 && (count < 10 || count > 20)) {
-      photosText = `${count} zdjęcia`;
-    } else {
-      photosText = `${count} zdjęć`;
-    }
-    statusEl.textContent = `✅ Gotowe: ${photosText}`;
-  }
-
-  // =========================================================================
-  // 4. FUNKCJE RESET
-  // =========================================================================
-  
-  function resetBulkForm() {
-    photoInput.value = '';
-    if (bulkPreviewContainer) {
-      bulkPreviewContainer.innerHTML = '';
-      bulkPreviewContainer.style.display = 'none';
-    }
-    statusEl.textContent = '';
-    bulkBtn.disabled = true;
-    bulkBtn.style.opacity = '0.5';
-  }
-
-  function resetWishForm() {
-    wishInput.value = '';
-    wishMessage.value = '';
-    charCount.textContent = '0';
-    if (wishPreviewContainer) wishPreviewContainer.style.display = 'none';
-  }
-
-  function showBulkPreview() {
-    const files = photoInput.files;
-    if (!bulkPreviewContainer) return;
-    
-    bulkPreviewContainer.innerHTML = '';
     bulkPreviewContainer.style.display = 'flex';
 
-    Array.from(files).forEach(file => {
+    selectedFiles.forEach((file, index) => {
       if (!file.type.startsWith('image/')) return;
 
+      const wrapper = document.createElement('div');
+      wrapper.style.position = 'relative';
+      wrapper.style.display = 'inline-block';
+
       const img = document.createElement('img');
-      Object.assign(img.style, {
-        width: '100px',
-        height: '100px',
-        objectFit: 'cover',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-      });
       img.src = URL.createObjectURL(file);
-      bulkPreviewContainer.appendChild(img);
+      img.alt = file.name;
+      img.style.width = '80px';
+      img.style.height = '80px';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '8px';
+      img.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.textContent = '✕';
+      removeBtn.style.position = 'absolute';
+      removeBtn.style.top = '-8px';
+      removeBtn.style.right = '-8px';
+      removeBtn.style.width = '22px';
+      removeBtn.style.height = '22px';
+      removeBtn.style.borderRadius = '50%';
+      removeBtn.style.border = 'none';
+      removeBtn.style.background = '#dc3545';
+      removeBtn.style.color = 'white';
+      removeBtn.style.fontSize = '14px';
+      removeBtn.style.display = 'flex';
+      removeBtn.style.alignItems = 'center';
+      removeBtn.style.justifyContent = 'center';
+      removeBtn.style.cursor = 'pointer';
+      removeBtn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+      removeBtn.style.padding = '0';
+      removeBtn.addEventListener('click', () => {
+        selectedFiles.splice(index, 1);
+        renderBulkPreview();
+        validateBulkButton();
+      });
+
+      wrapper.appendChild(img);
+      wrapper.appendChild(removeBtn);
+      bulkPreviewContainer.appendChild(wrapper);
     });
   }
 
-  // =========================================================================
-  // 5. SUBMIT HANDLERY
-  // =========================================================================
-  
+  function validateBulkButton() {
+    const fileCount = selectedFiles.length;
+    const hasFiles = fileCount > 0;
+    const tooManyFiles = fileCount > 10;
+
+    if (tooManyFiles) {
+      alert(`⚠️ Maksymalnie 10 zdjęć!\nWybrano: ${fileCount}\nPonownie wybierz zdjęcia lub usuń część.`);
+      statusEl.textContent = '⚠️ Wybierz maksymalnie 10 zdjęć';
+      bulkBtn.disabled = true;
+      bulkBtn.style.opacity = '0.5';
+      return;
+    }
+
+    if (hasFiles) {
+      let photosText = '';
+      if (fileCount === 1) {
+        photosText = '1 zdjęcie';
+      } else if (fileCount % 10 >= 2 && fileCount % 10 <= 4 && (fileCount < 10 || fileCount > 20)) {
+        photosText = `${fileCount} zdjęcia`;
+      } else {
+        photosText = `${fileCount} zdjęć`;
+      }
+      statusEl.textContent = `✅ Gotowe: ${photosText}`;
+      bulkBtn.disabled = false;
+      bulkBtn.style.opacity = '1';
+    } else {
+      statusEl.textContent = '';
+      bulkBtn.disabled = true;
+      bulkBtn.style.opacity = '0.5';
+      bulkPreviewContainer.style.display = 'none';
+    }
+  }
+
+  // BULK UPLOAD - wysyłanie selectedFiles
   bulkForm.onsubmit = async (e) => {
     e.preventDefault();
+
+    if (selectedFiles.length === 0) {
+      statusEl.textContent = 'Najpierw wybierz zdjęcia.';
+      return;
+    }
+
     statusEl.textContent = 'Przesyłanie...';
 
-    for (let file of photoInput.files) {
+    for (let file of selectedFiles) {
       const formData = new FormData();
       formData.append('photo', file);
 
       const res = await fetch('/upload', { method: 'POST', body: formData });
       if (!res.ok) {
-        statusEl.textContent = 'Błąd: ' + await res.text();
+        statusEl.textContent = 'Błąd: ' + (await res.text());
         return;
       }
     }
 
-    resetBulkForm();
+    // Reset stanu po wysłaniu
+    selectedFiles = [];
+    photoInput.value = '';
+    bulkPreviewContainer.innerHTML = '';
+    bulkPreviewContainer.style.display = 'none';
+
     statusEl.innerHTML = '✅ Zdjęcia przesłane pomyślnie!';
+    bulkBtn.disabled = true;
+    bulkBtn.style.opacity = '0.5';
   };
 
+  // WALIDACJA ŻYCZEŃ
+  wishInput.addEventListener('change', () => {
+    selectedWishFile = wishInput.files[0] || null;
+    renderWishPreview();
+    toggleWishBtn();
+  });
+  wishMessage.addEventListener('input', toggleWishBtn);
+
+  function renderWishPreview() {
+    // Usuń stary krzyżyk, jeśli jest
+    const oldRemoveBtn = previewContainer.querySelector('.wish-remove-btn');
+    if (oldRemoveBtn) oldRemoveBtn.remove();
+
+    if (selectedWishFile) {
+      previewImg.src = URL.createObjectURL(selectedWishFile);
+      previewContainer.style.display = 'block';
+
+      // Dodaj krzyżyk do usuwania
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'wish-remove-btn';
+      removeBtn.textContent = '✕';
+      removeBtn.style.position = 'absolute';
+      removeBtn.style.top = '-8px';
+      removeBtn.style.right = '-8px';
+      removeBtn.style.width = '22px';
+      removeBtn.style.height = '22px';
+      removeBtn.style.borderRadius = '50%';
+      removeBtn.style.border = 'none';
+      removeBtn.style.background = '#dc3545';
+      removeBtn.style.color = 'white';
+      removeBtn.style.fontSize = '14px';
+      removeBtn.style.display = 'flex';
+      removeBtn.style.alignItems = 'center';
+      removeBtn.style.justifyContent = 'center';
+      removeBtn.style.cursor = 'pointer';
+      removeBtn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+      removeBtn.style.padding = '0';
+      removeBtn.style.zIndex = '10';
+
+      removeBtn.addEventListener('click', () => {
+        selectedWishFile = null;
+        wishInput.value = '';
+        previewImg.src = '';
+        previewContainer.style.display = 'none';
+        toggleWishBtn();
+      });
+
+      previewContainer.style.position = 'relative';
+      previewContainer.appendChild(removeBtn);
+    } else {
+      previewImg.src = '';
+      previewContainer.style.display = 'none';
+    }
+  }
+
+  function toggleWishBtn() {
+    const hasPhoto = selectedWishFile !== null;
+    const hasText = wishMessage.value.trim().length > 0;
+    const isValid = hasPhoto && hasText;
+
+    wishBtn.disabled = !isValid;
+    wishBtn.style.opacity = isValid ? '1' : '0.5';
+    wishBtn.style.cursor = isValid ? 'pointer' : 'not-allowed';
+  }
+
+  // ŻYCZENIA – upload
   wishForm.onsubmit = async (e) => {
     e.preventDefault();
-    const statusEl = document.getElementById('status');
 
-    if (!wishInput.files[0]) {
+    if (!selectedWishFile) {
       statusEl.textContent = 'Wybierz zdjęcie!';
       return;
     }
 
     const formData = new FormData();
-    formData.append('photo', wishInput.files[0]);
+    formData.append('photo', selectedWishFile);
     formData.append('message', wishMessage.value.trim());
 
     statusEl.textContent = 'Przesyłanie życzeń...';
 
     const res = await fetch('/upload', { method: 'POST', body: formData });
     if (res.ok) {
-      resetWishForm();
+      selectedWishFile = null;
+      wishInput.value = '';
+      wishMessage.value = '';
+      document.getElementById('charCount').textContent = '0';
+      previewImg.src = '';
+      previewContainer.style.display = 'none';
       statusEl.innerHTML = '💝 Zdjęcie z życzeniami przesłane pomyślnie!';
+      toggleWishBtn();
     } else {
       statusEl.textContent = 'Błąd!';
     }
-  };
-
-  // =========================================================================
-  // 6. PREVIEW + LICZNIK ŻYCZEŃ
-  // =========================================================================
-  
-  wishInput.onchange = (e) => {
-    const file = e.target.files[0];
-    if (wishPreviewContainer) {
-      const previewImg = document.getElementById('previewImg');
-      if (file) {
-        previewImg.src = URL.createObjectURL(file);
-        wishPreviewContainer.style.display = 'block';
-      } else {
-        wishPreviewContainer.style.display = 'none';
-      }
-    }
-  };
-
-  wishMessage.oninput = (e) => {
-    charCount.textContent = e.target.value.length;
   };
 });
