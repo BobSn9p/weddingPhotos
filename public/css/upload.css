@@ -1,20 +1,106 @@
-
 /* Formularze dodawania zdjęć upload */
 form {
   margin-bottom: 25px;
 }
 
-input[type="file"] {
-  margin-bottom: 15px;
-  padding: 10px;
-  border: 2px dashed #ddd;
-  border-radius: 8px;
-  background: #fafafa;
+/* Ukryty natywny input file */
+#photoInput {
+  display: none;
 }
 
-button {
+/* Własny przycisk wyboru zdjęć */
+#selectPhotosBtn {
   cursor: pointer;
   padding: 12px 30px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+#selectPhotosBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,123,255,0.3);
+}
+
+/* Licznik wybranych plików */
+.file-count {
+  text-align: center;
+  margin: 10px 0;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border-radius: 25px;
+  font-weight: bold;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+}
+
+/* Kontener podglądu wielu zdjęć */
+.bulk-preview {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 15px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px dashed #dee2e6;
+  min-height: 100px;
+}
+
+/* Wrapper pojedynczej miniatury */
+.bulk-preview > div {
+  position: relative;
+  display: inline-block;
+}
+
+/* Miniaturki zdjęć w podglądzie */
+.bulk-preview img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  display: block;
+}
+
+/* Czerwone krzyżyki usuwania w podglądzie wielu zdjęć */
+.bulk-preview button {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: #dc3545;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(220,53,69,0.4);
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.bulk-preview button:hover {
+  background: #c82333;
+  transform: scale(1.1);
+}
+
+/* Przycisk wysyłki wielu zdjęć */
+#uploadPhotosBtn {
+  cursor: pointer;
+  padding: 15px 30px;
   font-size: 16px;
   border: none;
   border-radius: 8px;
@@ -22,87 +108,125 @@ button {
   color: white;
   font-weight: bold;
   transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 15px;
 }
 
-button:enabled:hover {
+#uploadPhotosBtn:enabled:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(40,167,69,0.3);
 }
 
+/* Status ogólny */
 #status {
-  margin-top: 15px;
-  padding: 12px;
+  margin-top: 20px;
+  padding: 15px;
   border-radius: 8px;
-  font-weight: bold;
+  font-weight: 500;
+  text-align: center;
 }
 
 #status:empty {
   display: none;
 }
 
-/* Koniec */
+/* WALIDACJA PRZYCISKÓW - globalnie */
+button:disabled,
+button:disabled:hover,
+button:disabled:focus,
+button:disabled:active {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  background: #ccc !important;
+}
 
-.wish-section { 
-      margin-top: 30px; 
-      padding: 25px; 
-      border: 2px dashed #007bff; 
-      border-radius: 12px; 
-      background: #f8f9ff;
-    }
-    .wish-input { 
-      width: 80%; 
-      height: 50px; 
-      padding: 15px; 
-      border: 2px solid #e0e0e0; 
-      border-radius: 8px; 
-      font-size: 16px; 
-      resize: none;
-      font-family: inherit;
-    }
-    .wish-input:focus { 
-      border-color: #007bff; 
-      outline: none; 
-      box-shadow: 0 0 0 3px rgba(0,123,255,0.1); 
-    }
-    .char-counter { 
-      text-align: right; 
-      margin-top: 5px; 
-      color: #666; 
-      font-size: 14px; 
-    }
-    .char-limit { color: #007bff; font-weight: bold; }
-    .wish-btn { 
-      margin-top: 20px; 
-      width: 100%; 
-      padding: 15px; 
-      background: linear-gradient(135deg, #28a745, #20c997); 
-      color: white; 
-      border: none; 
-      border-radius: 8px; 
-      font-size: 16px; 
-      cursor: pointer;
-    }
-    .wish-btn:hover { opacity: 0.9; }
-    .preview-container { 
-      margin: 20px 0; 
-      text-align: center; 
-    }
-    .preview-img { 
-      max-width: 200px; 
-      max-height: 200px; 
-      border-radius: 8px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
-    }
+/* Sekcja życzeń */
+.wish-input { 
+  width: 80%; 
+  height: 100px;
+  padding: 15px; 
+  border: 2px solid #e0e0e0; 
+  border-radius: 8px; 
+  font-size: 16px; 
+  resize: vertical;
+  font-family: inherit;
+  margin-top: 15px;
+}
 
-  button:disabled,
-  button:disabled:hover,
-  button:disabled:focus,
-  button:disabled:active {
-    opacity: 0.5 !important;
-    cursor: not-allowed !important;
-    transform: none !important;
-    background: #ccc !important;
-  }
+.wish-input:focus { 
+  border-color: #007bff; 
+  outline: none; 
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.1); 
+}
 
-  /* Koniec */
-  
+.char-counter { 
+  text-align: right; 
+  margin-top: 5px; 
+  color: #666; 
+  font-size: 14px; 
+}
+
+.char-limit { 
+  color: #007bff; 
+  font-weight: bold; 
+}
+
+.wish-btn { 
+  margin-top: 20px; 
+  width: 100%; 
+  padding: 15px; 
+  background: linear-gradient(135deg, #28a745, #20c997); 
+  color: white; 
+  border: none; 
+  border-radius: 8px; 
+  font-size: 16px; 
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.wish-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(40,167,69,0.3);
+}
+
+/* Podgląd zdjęcia z życzeniami */
+.preview-container {
+  margin: 20px 0;
+  text-align: center;
+  position: relative;
+}
+
+.preview-img { 
+  max-width: 200px; 
+  max-height: 200px; 
+  border-radius: 8px; 
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+}
+
+/* Czerwony krzyżyk dla życzeń */
+.wish-remove-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: #dc3545;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(220,53,69,0.4);
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.wish-remove-btn:hover {
+  background: #c82333;
+  transform: scale(1.1);
+}

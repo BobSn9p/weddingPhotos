@@ -11,18 +11,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const bulkPreviewContainer = document.getElementById('bulkPreviewContainer');
   const previewContainer = document.getElementById('previewContainer');
   const previewImg = document.getElementById('previewImg');
-
+  const charCount = document.getElementById('charCount');
+  selectPhotosBtn.addEventListener('click', () => {
+    photoInput.click();
+  });
+  
   // Reset stanu na starcie
   photoInput.value = '';
   wishInput.value = '';
   wishMessage.value = '';
-  document.getElementById('charCount').textContent = '0';
+  charCount.textContent = '0';
   bulkPreviewContainer.innerHTML = '';
   bulkPreviewContainer.style.display = 'none';
   previewContainer.style.display = 'none';
   previewImg.src = '';
 
-  // Inicjalizuj przyciski
   bulkBtn.disabled = true;
   wishBtn.disabled = true;
 
@@ -31,21 +34,30 @@ document.addEventListener('DOMContentLoaded', () => {
   // Pojedynczy plik dla życzeń
   let selectedWishFile = null;
 
-  // WALIDACJA + PODGLĄD BULK UPLOAD
-  photoInput.addEventListener('change', (e) => {
-    selectedFiles = Array.from(e.target.files || []);
-    renderBulkPreview();
-    validateBulkButton();
-  });
+  // Obsługa zmiany inputa dla wielu zdjęć
+photoInput.addEventListener('change', (e) => {
+  const newFiles = Array.from(e.target.files || []);
+  
+  if (newFiles.length > 10) {
+    // ✅ BLOKUJ >10 PLIKÓW - ALERT + NIE DODAJAJ
+    alert(`⚠️ Maksymalnie 10 zdjęć!\nWybrano: ${newFiles.length}\nWybierz maksymalnie 10.`);
+    photoInput.value = ''; // Reset input
+    return;
+  }
+  
+  // ✅ DODAJ TYLKO jeśli <=10
+  selectedFiles = newFiles;
+  renderBulkPreview();
+  validateBulkButton();
+});
 
+  // Renderowanie miniatur z krzyżykami dla wielu zdjęć
   function renderBulkPreview() {
     bulkPreviewContainer.innerHTML = '';
-
     if (selectedFiles.length === 0) {
       bulkPreviewContainer.style.display = 'none';
       return;
     }
-
     bulkPreviewContainer.style.display = 'flex';
 
     selectedFiles.forEach((file, index) => {
@@ -54,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const wrapper = document.createElement('div');
       wrapper.style.position = 'relative';
       wrapper.style.display = 'inline-block';
+      wrapper.style.margin = '5px';
 
       const img = document.createElement('img');
       img.src = URL.createObjectURL(file);
@@ -67,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const removeBtn = document.createElement('button');
       removeBtn.type = 'button';
       removeBtn.textContent = '✕';
+      removeBtn.title = 'Usuń zdjęcie';
       removeBtn.style.position = 'absolute';
       removeBtn.style.top = '-8px';
       removeBtn.style.right = '-8px';
@@ -83,6 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
       removeBtn.style.cursor = 'pointer';
       removeBtn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
       removeBtn.style.padding = '0';
+      removeBtn.style.zIndex = '10';
+
       removeBtn.addEventListener('click', () => {
         selectedFiles.splice(index, 1);
         renderBulkPreview();
@@ -95,13 +111,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Walidacja przycisku wysyłki dla wielu zdjęć
   function validateBulkButton() {
     const fileCount = selectedFiles.length;
     const hasFiles = fileCount > 0;
     const tooManyFiles = fileCount > 10;
 
     if (tooManyFiles) {
-      alert(`⚠️ Maksymalnie 10 zdjęć!\nWybrano: ${fileCount}\nPonownie wybierz zdjęcia lub usuń część.`);
+      alert(`⚠️ Maksymalnie 10 zdjęć!\nWybrano: ${fileCount}\nUsuń kilka zdjęć.`);
       statusEl.textContent = '⚠️ Wybierz maksymalnie 10 zdjęć';
       bulkBtn.disabled = true;
       bulkBtn.style.opacity = '0.5';
@@ -128,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // BULK UPLOAD - wysyłanie selectedFiles
+  // Obsługa wysyłki wielu zdjęć
   bulkForm.onsubmit = async (e) => {
     e.preventDefault();
 
@@ -161,16 +178,17 @@ document.addEventListener('DOMContentLoaded', () => {
     bulkBtn.style.opacity = '0.5';
   };
 
-  // WALIDACJA ŻYCZEŃ
+  // Obsługa życzeń - zmiana pliku z podglądem i krzyżykiem
   wishInput.addEventListener('change', () => {
     selectedWishFile = wishInput.files[0] || null;
     renderWishPreview();
     toggleWishBtn();
   });
+
   wishMessage.addEventListener('input', toggleWishBtn);
 
+  // Renderowanie podglądu życzeń z krzyżykiem do usuwania
   function renderWishPreview() {
-    // Usuń stary krzyżyk, jeśli jest
     const oldRemoveBtn = previewContainer.querySelector('.wish-remove-btn');
     if (oldRemoveBtn) oldRemoveBtn.remove();
 
@@ -178,11 +196,11 @@ document.addEventListener('DOMContentLoaded', () => {
       previewImg.src = URL.createObjectURL(selectedWishFile);
       previewContainer.style.display = 'block';
 
-      // Dodaj krzyżyk do usuwania
       const removeBtn = document.createElement('button');
       removeBtn.type = 'button';
       removeBtn.className = 'wish-remove-btn';
       removeBtn.textContent = '✕';
+      removeBtn.title = 'Usuń zdjęcie';
       removeBtn.style.position = 'absolute';
       removeBtn.style.top = '-8px';
       removeBtn.style.right = '-8px';
@@ -217,6 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Walidacja przycisku życzeń
   function toggleWishBtn() {
     const hasPhoto = selectedWishFile !== null;
     const hasText = wishMessage.value.trim().length > 0;
@@ -227,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
     wishBtn.style.cursor = isValid ? 'pointer' : 'not-allowed';
   }
 
-  // ŻYCZENIA – upload
+  // Obsługa wysyłki życzeń
   wishForm.onsubmit = async (e) => {
     e.preventDefault();
 
@@ -243,11 +262,12 @@ document.addEventListener('DOMContentLoaded', () => {
     statusEl.textContent = 'Przesyłanie życzeń...';
 
     const res = await fetch('/upload', { method: 'POST', body: formData });
+
     if (res.ok) {
       selectedWishFile = null;
       wishInput.value = '';
       wishMessage.value = '';
-      document.getElementById('charCount').textContent = '0';
+      charCount.textContent = '0';
       previewImg.src = '';
       previewContainer.style.display = 'none';
       statusEl.innerHTML = '💝 Zdjęcie z życzeniami przesłane pomyślnie!';
@@ -256,4 +276,9 @@ document.addEventListener('DOMContentLoaded', () => {
       statusEl.textContent = 'Błąd!';
     }
   };
+
+  // Licznik znaków dla pola z życzeniami
+  wishMessage.addEventListener('input', (e) => {
+    charCount.textContent = e.target.value.length;
+  });
 });
