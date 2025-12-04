@@ -12,9 +12,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const previewContainer = document.getElementById('previewContainer');
   const previewImg = document.getElementById('previewImg');
   const charCount = document.getElementById('charCount');
+  const selectPhotosBtn = document.getElementById('selectPhotosBtn');
+  const selectWishPhotoBtn = document.getElementById('selectWishPhotoBtn');
+
   selectPhotosBtn.addEventListener('click', () => {
     photoInput.click();
   });
+
+  selectWishPhotoBtn.addEventListener('click', () => {
+  wishInput.click();
+});
   
   // Reset stanu na starcie
   photoInput.value = '';

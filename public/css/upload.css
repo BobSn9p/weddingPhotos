@@ -9,7 +9,8 @@ form {
 }
 
 /* Własny przycisk wyboru zdjęć */
-#selectPhotosBtn {
+
+.selectPhotosBtnStyle {
   cursor: pointer;
   padding: 12px 30px;
   font-size: 16px;
@@ -23,7 +24,7 @@ form {
   margin-bottom: 15px;
 }
 
-#selectPhotosBtn:hover:not(:disabled) {
+.selectPhotosBtnStyle:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0,123,255,0.3);
 }
@@ -98,7 +99,8 @@ form {
 }
 
 /* Przycisk wysyłki wielu zdjęć */
-#uploadPhotosBtn {
+
+.uploadPhotosBtnStyle {
   cursor: pointer;
   padding: 15px 30px;
   font-size: 16px;
@@ -112,10 +114,11 @@ form {
   margin-top: 15px;
 }
 
-#uploadPhotosBtn:enabled:hover {
+.uploadPhotosBtnStyle:enabled:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(40,167,69,0.3);
 }
+
 
 /* Status ogólny */
 #status {
@@ -149,7 +152,7 @@ button:disabled:active {
   border: 2px solid #e0e0e0; 
   border-radius: 8px; 
   font-size: 16px; 
-  resize: vertical;
+  resize: none;
   font-family: inherit;
   margin-top: 15px;
 }
@@ -170,24 +173,6 @@ button:disabled:active {
 .char-limit { 
   color: #007bff; 
   font-weight: bold; 
-}
-
-.wish-btn { 
-  margin-top: 20px; 
-  width: 100%; 
-  padding: 15px; 
-  background: linear-gradient(135deg, #28a745, #20c997); 
-  color: white; 
-  border: none; 
-  border-radius: 8px; 
-  font-size: 16px; 
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.wish-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(40,167,69,0.3);
 }
 
 /* Podgląd zdjęcia z życzeniami */
