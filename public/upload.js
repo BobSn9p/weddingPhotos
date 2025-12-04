@@ -243,7 +243,8 @@ photoInput.addEventListener('change', (e) => {
       wishMessage.value = '';
       charCount.textContent = '0';
       previewImg.src = '';
-
+      previewContainer.innerHTML = '';           // ✅ CZYSZCIE WSZYSTKO!
+      previewContainer.style.display = 'none';
       previewContainer.style.display = 'none';
       statusEl.innerHTML = '💝 Zdjęcie z życzeniami przesłane pomyślnie!';
       toggleWishBtn();
