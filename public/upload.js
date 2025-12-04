@@ -86,25 +86,9 @@ photoInput.addEventListener('change', (e) => {
 
       const removeBtn = document.createElement('button');
       removeBtn.type = 'button';
+      removeBtn.className = 'wish-remove-btn';  // ✅ CSS robi resztę!
       removeBtn.textContent = '✕';
-      removeBtn.title = 'Usuń zdjęcie';
-      removeBtn.style.position = 'absolute';
-      removeBtn.style.top = '-8px';
-      removeBtn.style.right = '-8px';
-      removeBtn.style.width = '22px';
-      removeBtn.style.height = '22px';
-      removeBtn.style.borderRadius = '50%';
-      removeBtn.style.border = 'none';
-      removeBtn.style.background = '#dc3545';
-      removeBtn.style.color = 'white';
-      removeBtn.style.fontSize = '14px';
-      removeBtn.style.display = 'flex';
-      removeBtn.style.alignItems = 'center';
-      removeBtn.style.justifyContent = 'center';
-      removeBtn.style.cursor = 'pointer';
-      removeBtn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
-      removeBtn.style.padding = '0';
-      removeBtn.style.zIndex = '10';
+      removeBtn.title = 'Usuń zdjęcie';   
 
       removeBtn.addEventListener('click', () => {
         selectedFiles.splice(index, 1);
@@ -205,33 +189,16 @@ photoInput.addEventListener('change', (e) => {
 
       const removeBtn = document.createElement('button');
       removeBtn.type = 'button';
-      removeBtn.className = 'wish-remove-btn';
+      removeBtn.className = 'remove-btn';  // ✅ Nowa klasa CSS!
       removeBtn.textContent = '✕';
       removeBtn.title = 'Usuń zdjęcie';
-      removeBtn.style.position = 'absolute';
-      removeBtn.style.top = '-8px';
-      removeBtn.style.right = '-8px';
-      removeBtn.style.width = '22px';
-      removeBtn.style.height = '22px';
-      removeBtn.style.borderRadius = '50%';
-      removeBtn.style.border = 'none';
-      removeBtn.style.background = '#dc3545';
-      removeBtn.style.color = 'white';
-      removeBtn.style.fontSize = '14px';
-      removeBtn.style.display = 'flex';
-      removeBtn.style.alignItems = 'center';
-      removeBtn.style.justifyContent = 'center';
-      removeBtn.style.cursor = 'pointer';
-      removeBtn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
-      removeBtn.style.padding = '0';
-      removeBtn.style.zIndex = '10';
-
       removeBtn.addEventListener('click', () => {
         selectedWishFile = null;
         wishInput.value = '';
         previewImg.src = '';
         previewContainer.style.display = 'none';
         toggleWishBtn();
+        removeBtn.remove();
       });
 
       previewContainer.style.position = 'relative';
@@ -276,6 +243,7 @@ photoInput.addEventListener('change', (e) => {
       wishMessage.value = '';
       charCount.textContent = '0';
       previewImg.src = '';
+
       previewContainer.style.display = 'none';
       statusEl.innerHTML = '💝 Zdjęcie z życzeniami przesłane pomyślnie!';
       toggleWishBtn();

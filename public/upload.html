@@ -16,7 +16,6 @@
       <form id="bulkUploadForm">
         <h3>Zdjęcia (maks. 10 jednocześnie)</h3>
 
-        <!-- Ukryty input do plików -->
         <input
           type="file"
           id="photoInput"
@@ -27,12 +26,10 @@
           style="display: none"
         />
 
-        <!-- Własny przycisk wyzwalający input -->
         <button type="button" id="selectPhotosBtn" class="selectPhotosBtnStyle">
           Wybierz zdjęcia
         </button>
 
-        <!-- Kontener podglądu miniatur -->
         <div id="bulkPreviewContainer" class="bulk-preview"></div>
 
         <button type="submit" disabled class="uploadPhotosBtnStyle">
@@ -40,24 +37,24 @@
         </button>
       </form>
 
-      <hr style="margin: 40px 0" />
-
       <!-- Zdjęcie z życzeniami -->
       <div class="container">
         <h3>💝 Zdjęcie z życzeniami</h3>
         <form id="wishUploadForm">
-          <!-- Ukryty input -->
           <input
             type="file"
             id="wishInput"
             accept="image/*"
-            required
             autocomplete="off"
             style="display: none"
+            required
           />
 
-          <!-- Własny przycisk -->
-          <button type="button" id="selectWishPhotoBtn" class="selectPhotosBtnStyle">
+          <button
+            type="button"
+            id="selectWishPhotoBtn"
+            class="selectPhotosBtnStyle"
+          >
             Wybierz zdjęcie z życzeniami
           </button>
 
