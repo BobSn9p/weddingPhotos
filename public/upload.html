@@ -1,50 +1,65 @@
 <!DOCTYPE html>
 <html lang="pl">
-<head>
-  <meta charset="UTF-8" />
-  <title>Prześlij zdjęcia</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <div class="container">
-    <h1>Prześlij zdjęcia</h1>
-    <a href="/" class="back-btn">← Powrót</a>
-    
-    <form id="uploadForm">
-      <input type="file" id="photoInput" name="photo" accept="image/*" required multiple />
-      <br />
-      <button type="submit">Dodaj zdjęcia</button>
-    </form>
-    
-    <div id="status"></div>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prześlij zdjęcia</title>
+    <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/upload.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Prześlij zdjęcia</h1>
+      <a href="/" class="back-btn">← Strona główna</a>
 
-  <script>
-    document.getElementById('uploadForm').onsubmit = async (e) => {
-      e.preventDefault();
-      const input = document.getElementById('photoInput');
-      const status = document.getElementById('status');
-      
-      status.textContent = 'Przesyłanie...';
-      
-      for (let file of input.files) {
-        const formData = new FormData();
-        formData.append('photo', file);
-        
-        const res = await fetch('/upload', { 
-          method: 'POST', 
-          body: formData 
-        });
-        
-        if (!res.ok) {
-          status.textContent = 'Błąd: ' + await res.text();
-          return;
-        }
-      }
-      
-      input.value = '';
-      status.innerHTML = '✅ Zdjęcia zostały przesłane pomyślnie!';
-    };
-  </script>
-</body>
+      <!-- Wiele zdjęć -->
+      <form id="bulkUploadForm">
+        <h3>Zdjęcia (maks. 10 jednocześnie)</h3>
+
+        <!-- Ukryty input do plików -->
+        <input type="file" id="photoInput" accept="image/*" multiple required autocomplete="off" style="display:none" />
+
+        <!-- Własny przycisk wyzwalający input -->
+        <button type="button" id="selectPhotosBtn" class="btn-primary">Wybierz zdjęcia</button>
+
+        <!-- Do wyrzucenia -->
+        <!-- Licznik wybranych plików -->
+        <div id="bulkFileCount" class="file-count" style="display:none;">Wybranych plików: 0</div> 
+        <!-- Do wyrzucenia -->
+
+        <!-- Kontener podglądu miniatur -->
+        <div id="bulkPreviewContainer" class="bulk-preview"></div>
+
+        <button type="submit" disabled id="uploadPhotosBtn" class="btn-primary">Dodaj wiele zdjęć</button>
+      </form>
+
+      <hr style="margin: 40px 0" />
+
+      <!-- Zdjęcie z życzeniami -->
+      <div class="container">
+        <h3>💝 Zdjęcie z życzeniami</h3>
+        <form id="wishUploadForm">
+          <input type="file" id="wishInput" accept="image/*" required autocomplete="off" />
+          <div class="preview-container" id="previewContainer" style="display: none; position: relative;">
+            <img id="previewImg" class="preview-img" />
+          </div>
+          <textarea
+            id="wishMessage"
+            class="wish-input"
+            placeholder="Wpisz życzenia dla pary młodej... (maks. 100 znaków)"
+            maxlength="100"
+          ></textarea>
+          <div class="char-counter">
+            <span id="charCount">0</span>/<span class="char-limit">100</span>
+          </div>
+          <button type="submit" class="wish-btn" disabled>
+            ✨ Dodaj zdjęcie z życzeniami
+          </button>
+        </form>
+      </div>
+
+      <div id="status"></div>
+    </div>
+    <script src="upload.js"></script>
+  </body>
 </html>
