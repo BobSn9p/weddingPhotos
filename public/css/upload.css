@@ -161,7 +161,7 @@ button:disabled:active {
   border: 2px solid #e0e0e0; 
   border-radius: 8px; 
   font-size: 16px; 
-  resize: vertical;
+  resize: none;
   font-family: inherit;
   margin: 15px auto 0;
   display: block;
@@ -210,7 +210,7 @@ button:disabled:active {
   position: relative;
   display: inline-block !important;
   width: fit-content;
-  margin: 0 auto;
+  margin: 20px auto ;
 }
 
 .preview-img { 
@@ -220,3 +220,4 @@ button:disabled:active {
   box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
   display: block !important;
 }
+

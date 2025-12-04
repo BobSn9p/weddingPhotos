@@ -178,36 +178,40 @@ photoInput.addEventListener('change', (e) => {
 
   wishMessage.addEventListener('input', toggleWishBtn);
 
-  // Renderowanie podglądu życzeń z krzyżykiem do usuwania
-  function renderWishPreview() {
-    const oldRemoveBtn = previewContainer.querySelector('.wish-remove-btn');
-    if (oldRemoveBtn) oldRemoveBtn.remove();
-
-    if (selectedWishFile) {
-      previewImg.src = URL.createObjectURL(selectedWishFile);
-      previewContainer.style.display = 'block';
-
-      const removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
-      removeBtn.className = 'remove-btn';  // ✅ Nowa klasa CSS!
-      removeBtn.textContent = '✕';
-      removeBtn.title = 'Usuń zdjęcie';
-      removeBtn.addEventListener('click', () => {
-        selectedWishFile = null;
-        wishInput.value = '';
-        previewImg.src = '';
-        previewContainer.style.display = 'none';
-        toggleWishBtn();
-        removeBtn.remove();
-      });
-
-      previewContainer.style.position = 'relative';
-      previewContainer.appendChild(removeBtn);
-    } else {
+// ⭐️ TWÓJ ORYGINAŁ + TYLKO JEDNA LINIJKA (oznaczona ⭐️)
+function renderWishPreview() {
+  // CZYSZCZENIE
+  const oldRemoveBtn = previewContainer.querySelector('.wish-remove-btn');
+  if (oldRemoveBtn) oldRemoveBtn.remove();
+  
+  previewImg.src = '';
+  
+  if (selectedWishFile) {
+    // ⭐️ TYLKO src + dodaj przycisk - CSS zrobi resztę!
+    previewImg.src = URL.createObjectURL(selectedWishFile);
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'remove-btn';
+    removeBtn.textContent = '✕';
+    removeBtn.title = 'Usuń zdjęcie';
+    removeBtn.addEventListener('click', () => {
+      selectedWishFile = null;
+      wishInput.value = '';
       previewImg.src = '';
-      previewContainer.style.display = 'none';
-    }
+      previewContainer.classList.add('hidden'); // ⭐️ CSS class zamiast inline style
+      toggleWishBtn();
+      removeBtn.remove();
+    });
+
+    previewContainer.style.position = 'relative';
+    previewContainer.appendChild(removeBtn);
+  } else {
+    previewImg.src = '';
+    previewContainer.classList.add('hidden'); // ⭐️ CSS class zamiast inline style
   }
+}
+
 
   // Walidacja przycisku życzeń
   function toggleWishBtn() {
@@ -222,36 +226,39 @@ photoInput.addEventListener('change', (e) => {
 
   // Obsługa wysyłki życzeń
   wishForm.onsubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!selectedWishFile) {
-      statusEl.textContent = 'Wybierz zdjęcie!';
-      return;
-    }
+  if (!selectedWishFile) {
+    statusEl.textContent = 'Wybierz zdjęcie!';
+    return;
+  }
 
-    const formData = new FormData();
-    formData.append('photo', selectedWishFile);
-    formData.append('message', wishMessage.value.trim());
+  const formData = new FormData();
+  formData.append('photo', selectedWishFile);
+  formData.append('message', wishMessage.value.trim());
 
-    statusEl.textContent = 'Przesyłanie życzeń...';
+  statusEl.textContent = 'Przesyłanie życzeń...';
 
-    const res = await fetch('/upload', { method: 'POST', body: formData });
+  const res = await fetch('/upload', { method: 'POST', body: formData });
 
-    if (res.ok) {
-      selectedWishFile = null;
-      wishInput.value = '';
-      wishMessage.value = '';
-      charCount.textContent = '0';
-      previewImg.src = '';
-      previewContainer.innerHTML = '';           // ✅ CZYSZCIE WSZYSTKO!
-      previewContainer.style.display = 'none';
-      previewContainer.style.display = 'none';
-      statusEl.innerHTML = '💝 Zdjęcie z życzeniami przesłane pomyślnie!';
-      toggleWishBtn();
-    } else {
-      statusEl.textContent = 'Błąd!';
-    }
-  };
+  if (res.ok) {
+    selectedWishFile = null;
+    wishInput.value = '';
+    wishMessage.value = '';
+    charCount.textContent = '0';
+    previewImg.src = '';
+    // USUŃ TYLKO PRZYCISK USUWANIA zamiast czyszczenia całego kontenera
+    const removeBtn = previewContainer.querySelector('.remove-btn');
+    if (removeBtn) removeBtn.remove();
+    previewContainer.style.display = 'none';
+
+    statusEl.innerHTML = '💝 Zdjęcie z życzeniami przesłane pomyślnie!';
+    toggleWishBtn();
+  } else {
+    statusEl.textContent = 'Błąd!';
+  }
+};
+
 
   // Licznik znaków dla pola z życzeniami
   wishMessage.addEventListener('input', (e) => {
