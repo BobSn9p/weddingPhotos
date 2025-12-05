@@ -148,9 +148,8 @@ button:disabled:active {
 .wish-section { 
   margin-top: 30px; 
   padding: 25px; 
-  border: 2px dashed #007bff; 
-  border-radius: 12px; 
-  background: #f8f9ff;
+  border-top: 1px solid grey;
+  background: white;
 }
 
 .wish-input { 
@@ -221,3 +220,61 @@ button:disabled:active {
   display: block !important;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 15px !important;
+    margin: 0px !important;
+  }
+  
+  .upload-section {
+    margin-bottom: 1.5rem;
+  }
+  
+  .bulk-preview {
+    min-height: 120px;
+    overflow-y: auto;
+    max-height: 200px;
+  }
+  
+  .wish-input {
+    height: 80px;
+    width: 100%;
+  }
+  
+  h3 {
+    font-size: 18px;
+    margin-bottom: 1rem;
+    margin-top:0px;
+  }
+  
+  .page-header {
+    padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid grey;
+  }
+  .preview-container {
+    margin: 8px auto;      /* było 20px 0 / 20px auto – zmniejszamy */
+  }
+
+  .wish-input {
+    margin-top: 8px;       /* było 15px auto 0 – mniejsza przerwa nad textarea */
+  }
+
+  .wish-section {
+    margin-top:10px;
+  }
+}
+
+
+/* Sticky back button */
+/* @media (max-width: 480px) {
+  .page-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid grey;
+  }
+} */
