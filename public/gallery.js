@@ -11,21 +11,21 @@ let imageObserver = null;
 async function loadPhotos() {
   const res = await fetch('/photos');
   allPhotos = await res.json();
-  console.log('API zwraca:', allPhotos);
+  console.log('API returned:', allPhotos);
   const gallery = document.getElementById('gallery');
   const noPhotos = document.getElementById('noPhotos');
-  
+
   gallery.innerHTML = '';
   renderedCount = 0;
-  
+
   if (allPhotos.length === 0) {
     noPhotos.style.display = 'block';
     return;
   }
-  
+
   noPhotos.style.display = 'none';
-  console.log('Załadowano zdjęć:', allPhotos.length);
-  
+  console.log('Photos loaded:', allPhotos.length);
+
   initObservers(gallery);
   renderNextBatch(gallery);
 }
@@ -36,19 +36,25 @@ function initObservers(gallery) {
       if (entry.isIntersecting) {
         const img = entry.target;
         const index = parseInt(img.dataset.index);
-        img.src = `/photos/${allPhotos[index].filename}`;
+        // Use thumbnail for grid
+        img.src = allPhotos[index].thumbnail;
         img.loading = 'lazy';
+
+        // Handle thumbnail error (fallback to original if thumbnail missing)
+        img.onerror = () => {
+          img.src = allPhotos[index].original;
+        };
       }
     });
   }, { rootMargin: '100px', threshold: 0.1 });
-  
+
   scrollObserver = new IntersectionObserver((entries) => {
     const sentinel = entries[0];
     if (sentinel.isIntersecting && renderedCount < allPhotos.length) {
       renderNextBatch(sentinel.target.parentNode);
     }
   }, { threshold: 0 });
-  
+
   let sentinel = gallery.querySelector('.sentinel');
   if (!sentinel) {
     sentinel = document.createElement('div');
@@ -61,18 +67,18 @@ function initObservers(gallery) {
 function renderNextBatch(gallery) {
   const startIndex = renderedCount;
   const endIndex = Math.min(startIndex + BATCH_SIZE, allPhotos.length);
-  
+
   for (let i = startIndex; i < endIndex; i++) {
     createImageElement(gallery, i);
   }
-  
+
   renderedCount = endIndex;
   scrollObserver.observe(gallery.querySelector('.sentinel'));
 }
 
 function createImageElement(container, index) {
   const photo = allPhotos[index];
-  
+
   const wrapper = document.createElement('div');
   wrapper.style.cssText = `
     display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;
@@ -80,7 +86,7 @@ function createImageElement(container, index) {
 
   const img = document.createElement('img');
   img.dataset.index = index;
-  img.alt = `Zdjęcie ${index + 1}`;
+  img.alt = `Photo ${index + 1}`;
   img.style.cssText = `
     cursor: pointer; background: #f0f0f0; min-height: 200px;
   `;
@@ -89,7 +95,7 @@ function createImageElement(container, index) {
   wrapper.appendChild(img);
   imageObserver.observe(img);
 
-  // ✅ KLIKALNY BADGE "Z życzeniami"
+  // Badge with wishes
   if (photo.message && photo.message.trim() !== '') {
     const badge = document.createElement('div');
     badge.textContent = 'Z życzeniami';
@@ -114,17 +120,16 @@ function createImageElement(container, index) {
     });
     wrapper.appendChild(badge);
   }
-  
+
   container.insertBefore(wrapper, container.querySelector('.sentinel'));
 }
 
 function showWishesOverlay(index) {
   const photo = allPhotos[index];
-  
-  // Usuń poprzedni overlay
+
   const existingOverlay = document.getElementById('wishesOverlay');
   if (existingOverlay) existingOverlay.remove();
-  
+
   const overlay = document.createElement('div');
   overlay.id = 'wishesOverlay';
   overlay.style.cssText = `
@@ -133,7 +138,7 @@ function showWishesOverlay(index) {
     display: flex; justify-content: center; align-items: center;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   `;
-  
+
   const wishesBox = document.createElement('div');
   wishesBox.style.cssText = `
     background: white; padding: 40px; border-radius: 20px;
@@ -141,7 +146,7 @@ function showWishesOverlay(index) {
     text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     animation: slideIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   `;
-  
+
   wishesBox.innerHTML = `
     <div style="font-size: 24px; margin-bottom: 20px; color: #333;">
       💝 Życzenia
@@ -150,14 +155,12 @@ function showWishesOverlay(index) {
       font-size: 20px; line-height: 1.6; color: #444; 
       padding: 25px; background: #f8f9fa; border-radius: 12px;
       border-left: 5px solid #007bff;
-      ${/* ✅ ZAWIJANIE TEXTU */ `
-        word-wrap: break-word; 
-        overflow-wrap: break-word; 
-        white-space: pre-wrap; 
-        text-align: left; 
-        max-height: 60vh; 
-        overflow-y: auto;
-      `}
+      word-wrap: break-word; 
+      overflow-wrap: break-word; 
+      white-space: pre-wrap; 
+      text-align: left; 
+      max-height: 60vh; 
+      overflow-y: auto;
     ">
       ${photo.message}
     </div>
@@ -172,7 +175,7 @@ function showWishesOverlay(index) {
       Zamknij
     </button>
   `;
-  
+
   overlay.appendChild(wishesBox);
   document.body.appendChild(overlay);
 }
@@ -182,18 +185,19 @@ function openModal(index) {
   currentPhotoIndex = index;
   const modalImg = document.getElementById('modalImg');
   const modal = document.getElementById('modal');
-  
+
   const photo = allPhotos[currentPhotoIndex];
-  console.log('Otwieram modal:', photo.filename);
-  
+  console.log('Opening modal:', photo.filename);
+
   modalImg.style.transition = 'none';
   modalImg.style.transform = 'translateX(0) scale(1)';
-  modalImg.src = `/photos/${photo.filename}`;
-  
+  // Use original (optimized) for modal
+  modalImg.src = photo.original;
+
   updateCounter();
   showNavArrows();
   modal.style.display = 'flex';
-  
+
   setTimeout(() => {
     modalImg.style.transition = 'all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)';
   }, 50);
@@ -212,33 +216,34 @@ function showNavArrows() {
 
 function slidePhoto(direction) {
   if (isAnimating) return;
-  
+
   const nextIndex = currentPhotoIndex + direction;
   if (nextIndex < 0 || nextIndex >= allPhotos.length) return;
-  
+
   isAnimating = true;
   const modalImg = document.getElementById('modalImg');
-  
+
   const exitDirection = direction > 0 ? '-130%' : '130%';
   modalImg.style.transition = 'transform 0.25s ease-out';
   modalImg.style.transform = `translateX(${exitDirection})`;
-  
+
   setTimeout(() => {
-    modalImg.src = `/photos/${allPhotos[nextIndex].filename}`;
+    // Use original (optimized) for modal
+    modalImg.src = allPhotos[nextIndex].original;
     modalImg.style.transition = 'none';
     const entryDirection = direction > 0 ? '130%' : '-130%';
     modalImg.style.transform = `translateX(${entryDirection})`;
-    
+
     setTimeout(() => {
       modalImg.style.transition = 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
       modalImg.style.transform = 'translateX(0)';
-      
+
       currentPhotoIndex = nextIndex;
       updateCounter();
       showNavArrows();
     }, 20);
   }, 250);
-  
+
   setTimeout(() => {
     isAnimating = false;
   }, 600);
@@ -247,17 +252,17 @@ function slidePhoto(direction) {
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('navLeft').onclick = () => slidePhoto(-1);
   document.getElementById('navRight').onclick = () => slidePhoto(1);
-  
+
   document.getElementById('modalClose').onclick = () => {
     document.getElementById('modal').style.display = 'none';
   };
-  
+
   document.getElementById('modal').onclick = (e) => {
     if (e.target.id === 'modal') {
       document.getElementById('modal').style.display = 'none';
     }
   };
-  
+
   const modal = document.getElementById('modal');
   modal.addEventListener('touchstart', (e) => {
     if (isAnimating) return;
@@ -265,35 +270,35 @@ document.addEventListener('DOMContentLoaded', () => {
     startY = e.touches[0].clientY;
     isSwiping = true;
   }, { passive: true });
-  
+
   modal.addEventListener('touchmove', (e) => {
     if (!isSwiping || isAnimating) return;
     e.preventDefault();
   }, { passive: false });
-  
+
   modal.addEventListener('touchend', (e) => {
     if (!isSwiping || isAnimating) return;
-    
+
     const endX = e.changedTouches[0].clientX;
     const endY = e.changedTouches[0].clientY;
     const deltaX = startX - endX;
     const deltaY = Math.abs(startY - endY);
-    
+
     if (Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaX) > deltaY) {
       slidePhoto(deltaX > 0 ? 1 : -1);
     }
     isSwiping = false;
   }, { passive: true });
-  
+
   document.addEventListener('keydown', (e) => {
     if (document.getElementById('modal').style.display === 'flex' && !isAnimating) {
-      switch(e.key) {
-        case 'ArrowLeft':  e.preventDefault(); slidePhoto(-1); break;
-        case 'ArrowRight': e.preventDefault(); slidePhoto(1);  break;
-        case 'Escape':     document.getElementById('modal').style.display = 'none'; break;
+      switch (e.key) {
+        case 'ArrowLeft': e.preventDefault(); slidePhoto(-1); break;
+        case 'ArrowRight': e.preventDefault(); slidePhoto(1); break;
+        case 'Escape': document.getElementById('modal').style.display = 'none'; break;
       }
     }
   });
-  
+
   loadPhotos();
 });

@@ -6,6 +6,8 @@ yarn-error.log*
 
 # Photos folder (zdjęcia użytkownika)
 public/photos/
+public/originals/
+public/thumbnails/
 photos.json
 
 # Logi serwera
